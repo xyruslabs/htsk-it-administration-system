@@ -245,11 +245,8 @@ export const Layout = ({ children }) => {
       >
         <div className="flex-1 flex flex-col min-h-0">
           {/* Logo Header */}
-          <div className="px-5 py-4 border-b border-slate-200/90 dark:border-slate-800/80 flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
             <SmartHRLogo className="w-9 h-9" textSize="text-lg" showText={true} />
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-              v2.6 PRO
-            </span>
           </div>
 
           {/* Current User Quick Info Card */}
@@ -369,12 +366,27 @@ export const Layout = ({ children }) => {
             </button>
           </div>
 
-          <div className="flex items-center justify-between px-1 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>Org: SHR-PROD-26</span>
-            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              99.9% Online
-            </span>
+          {/* Org & Version Badge */}
+          <div className="space-y-1.5 px-0.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-slate-400 dark:text-slate-500 font-medium">Org:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 capitalize tracking-tight">
+                  Dinitha
+                </span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                v2.6 Pro
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+              <span>System Status</span>
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                99.9% Online
+              </span>
+            </div>
           </div>
 
           <button
