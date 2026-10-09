@@ -21,9 +21,9 @@ export const SmartHRLogo = ({
 
       {showText && (
         <div className="flex flex-col min-w-0">
-          <div className="font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="font-display font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <span className={fontClass}>
-              Smart<span className="text-emerald-500 font-extrabold">HR</span>
+              Smart<span className="text-emerald-500 font-black">HR</span>
             </span>
             {showBadge && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap shrink-0">

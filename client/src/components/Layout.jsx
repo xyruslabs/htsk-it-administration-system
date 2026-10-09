@@ -259,7 +259,7 @@ export const Layout = ({ children }) => {
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0D1424]"></span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-xs font-bold text-slate-900 dark:text-white truncate font-display tracking-tight">
                 {user?.firstName} {user?.lastName}
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
@@ -267,7 +267,7 @@ export const Layout = ({ children }) => {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span
-                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${getRoleBadgeColor(
+                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded border font-display tracking-wide ${getRoleBadgeColor(
                     user?.role
                   )}`}
                 >
@@ -290,7 +290,7 @@ export const Layout = ({ children }) => {
 
               return (
                 <div key={group.group} className="space-y-1">
-                  <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+                  <p className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-400 font-display">
                     {group.group}
                   </p>
                   {accessibleItems.map((item) => {
@@ -301,10 +301,10 @@ export const Layout = ({ children }) => {
                         key={item.path}
                         to={item.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
                           isActive
-                            ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 font-semibold shadow-xs'
-                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                            ? 'bg-slate-900 text-white dark:bg-[#121829] dark:text-[#D2FD41] border border-slate-800 dark:border-lime-400/20 font-bold shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-medium'
                         }`}
                       >
                         <div className="flex items-center space-x-2.5">
@@ -312,18 +312,18 @@ export const Layout = ({ children }) => {
                             size={16}
                             className={
                               isActive
-                                ? 'text-emerald-600 dark:text-emerald-400'
+                                ? 'text-[#D2FD41] dark:text-[#D2FD41]'
                                 : 'text-slate-400 dark:text-slate-400'
                             }
                           />
-                          <span>{item.label}</span>
+                          <span className={isActive ? 'font-bold' : ''}>{item.label}</span>
                         </div>
                         {item.badge && (
                           <span
                             className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                               item.badge === 'Live'
                                 ? 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30 animate-pulse'
-                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                                : 'bg-[#D2FD41] text-[#0A0E1A] font-extrabold'
                             }`}
                           >
                             {item.badge}
@@ -346,7 +346,7 @@ export const Layout = ({ children }) => {
               onClick={() => theme !== 'light' && toggleTheme()}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                 !isDark
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -357,7 +357,7 @@ export const Layout = ({ children }) => {
               onClick={() => theme !== 'dark' && toggleTheme()}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                 isDark
-                  ? 'bg-slate-800 text-white shadow-sm border border-slate-700/60'
+                  ? 'bg-slate-800 text-white shadow-sm border border-slate-700/60 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -371,18 +371,18 @@ export const Layout = ({ children }) => {
             <div className="flex items-center justify-between text-[11px]">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-slate-400 dark:text-slate-500 font-medium">Org:</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 capitalize tracking-tight">
+                <span className="font-display font-extrabold text-slate-800 dark:text-slate-200 capitalize tracking-tight">
                   Dinitha
                 </span>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide bg-[#D2FD41] text-[#0A0E1A] shadow-2xs whitespace-nowrap shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0A0E1A] animate-pulse" />
                 v2.6 Pro
               </span>
             </div>
             <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
               <span>System Status</span>
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 99.9% Online
               </span>
