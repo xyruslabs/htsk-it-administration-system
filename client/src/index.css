@@ -34,17 +34,92 @@
 
 /* Light Theme Automatic Contrast Adaptations */
 html:not(.dark) {
-  /* Headings & prominent text */
+  /* Headings & prominent titles */
   h1, h2, h3, h4, h5, h6 {
     color: #0F172A !important;
   }
 
-  /* Neutralize hardcoded text-white in light mode */
-  .text-white {
+  /* Digital clock container & time numbers in light mode */
+  .bg-\[\#090D16\] {
+    background-color: #0F172A !important;
+    border-color: #334155 !important;
+  }
+  .bg-\[\#090D16\] .text-white,
+  .bg-\[\#090D16\] .font-mono,
+  .bg-\[\#090D16\] div {
+    color: #F8FAFC !important;
+  }
+  .bg-\[\#090D16\] .text-slate-400 {
+    color: #94A3B8 !important;
+  }
+
+  /* Make dark container panels crisp white with clean slate borders */
+  .bg-\[\#0F172A\],
+  .bg-\[\#0D1424\],
+  .bg-slate-900,
+  .bg-slate-900\/80,
+  .bg-slate-900\/90 {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+  }
+
+  /* Neutral secondary panels and buttons in light mode */
+  .bg-\[\#0C1322\],
+  .bg-slate-850,
+  .bg-slate-800 {
+    background-color: #F1F5F9 !important;
+    border-color: #CBD5E1 !important;
+  }
+
+  /* Specific fix for Refresh and secondary utility buttons */
+  button.bg-slate-850,
+  button.bg-slate-800,
+  button.bg-slate-900,
+  .bg-slate-850 button,
+  .bg-slate-800 button {
+    background-color: #F8FAFC !important;
+    border-color: #CBD5E1 !important;
+    color: #0F172A !important;
+  }
+  button.bg-slate-850 span,
+  button.bg-slate-800 span,
+  button.bg-slate-850 svg,
+  button.bg-slate-800 svg {
+    color: #0F172A !important;
+  }
+  button.bg-slate-850:hover,
+  button.bg-slate-800:hover {
+    background-color: #E2E8F0 !important;
+    color: #000000 !important;
+  }
+
+  /* Neutralize hardcoded text-white in light mode cards and tables */
+  .text-white:not(button.bg-emerald-600 *):not(button.bg-rose-600 *):not(button.bg-blue-600 *):not(.bg-\[\#090D16\] *) {
     color: #0F172A !important;
   }
 
-  /* Keep deliberate white text on solid colored buttons */
+  .text-slate-200 {
+    color: #1E293B !important;
+  }
+
+  /* Subtitles & metadata text in light mode */
+  .text-slate-400,
+  .text-slate-300 {
+    color: #475569 !important;
+  }
+
+  .text-slate-500 {
+    color: #64748B !important;
+  }
+
+  /* Borders */
+  .border-slate-800,
+  .border-slate-750,
+  .border-slate-700 {
+    border-color: #E2E8F0 !important;
+  }
+
+  /* Preserve solid action button text */
   button.bg-emerald-600,
   button.bg-emerald-500,
   button.bg-rose-600,
@@ -56,40 +131,7 @@ html:not(.dark) {
     color: #FFFFFF !important;
   }
 
-  /* Make dark container panels crisp white with subtle borders */
-  .bg-\[\#0F172A\],
-  .bg-\[\#0D1424\],
-  .bg-slate-900,
-  .bg-slate-900\/80,
-  .bg-slate-900\/90 {
-    background-color: #FFFFFF !important;
-    border-color: #E2E8F0 !important;
-  }
-
-  .bg-\[\#0C1322\],
-  .bg-slate-850,
-  .bg-slate-800 {
-    background-color: #F8FAFC !important;
-    border-color: #E2E8F0 !important;
-  }
-
-  .border-slate-800,
-  .border-slate-750,
-  .border-slate-700 {
-    border-color: #E2E8F0 !important;
-  }
-
-  /* Subtitle and muted text in light mode */
-  .text-slate-400,
-  .text-slate-300 {
-    color: #475569 !important;
-  }
-
-  .text-slate-500 {
-    color: #64748B !important;
-  }
-
-  /* Table hover in light mode */
+  /* Table row hover */
   .hover\:bg-slate-850\/50:hover,
   .hover\:bg-slate-800\/60:hover {
     background-color: #F1F5F9 !important;

@@ -158,13 +158,13 @@ export const Attendance = () => {
           </div>
 
           {/* Precision Digital Clock */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-xl px-6 py-3 flex items-center space-x-4">
-            <Clock size={28} className="text-emerald-400 animate-pulse" />
+          <div className="bg-slate-900 dark:bg-[#090D16] border border-slate-700 dark:border-slate-800 rounded-xl px-6 py-3 flex items-center space-x-4 shadow-sm">
+            <Clock size={28} className="text-emerald-500 dark:text-emerald-400 animate-pulse" />
             <div>
               <div className="text-2xl font-mono font-bold text-white tracking-wider">
                 {currentTime.toLocaleTimeString('en-US', { hour12: false })}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-slate-300 dark:text-slate-400">
                 {currentTime.toLocaleDateString('en-US', {
                   weekday: 'short',
                   month: 'short',
