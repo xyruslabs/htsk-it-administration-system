@@ -55,29 +55,29 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Banner matching design */}
-      <div className="bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white dark:from-[#0F172A] dark:via-[#1E293B] dark:to-[#0F172A] border border-emerald-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm dark:shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30">
               EXECUTIVE VIEW
             </span>
-            <span className="text-xs text-slate-400">Dashboard &bull; Admin & HRMS</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Dashboard &bull; Admin & HRMS</span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Welcome Back, {user?.firstName || 'Adrian'} 👋
           </h2>
-          <p className="text-xs text-slate-300 mt-1">
-            You have <span className="text-amber-400 font-semibold">{stats?.pendingLeaves || 1} Pending Approvals</span> &{' '}
-            <span className="text-emerald-400 font-semibold">{onDuty} Active Floor Operations</span> today.
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+            You have <span className="text-amber-600 dark:text-amber-400 font-bold">{stats?.pendingLeaves || 1} Pending Approvals</span> &{' '}
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">{onDuty} Active Floor Operations</span> today.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-semibold border border-slate-700 transition">
+          <button className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-slate-700 shadow-sm transition cursor-pointer">
             <Calendar size={14} />
             <span>Add Schedule</span>
           </button>
-          <button className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-950/60 transition">
+          <button className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-950/20 transition cursor-pointer">
             <Plus size={14} />
             <span>Add Requests</span>
           </button>
@@ -206,52 +206,94 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Card 2: Attendance Radial Overview */}
-        <div className="bg-[#0F172A] border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h3 className="text-sm font-semibold text-white">Attendance Overview Gauge</h3>
-            <span className="text-xs text-emerald-400">Live Today</span>
+        <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between transition-colors">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Attendance Overview Gauge</h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              Live Today
+            </span>
           </div>
 
           <div className="flex flex-col items-center justify-center my-4">
-            <div className="relative w-40 h-24 flex items-end justify-center">
-              {/* Semi circle visual representation */}
-              <div className="w-36 h-36 rounded-full border-[10px] border-slate-800 border-t-emerald-500 border-r-amber-500 border-l-blue-500 flex items-center justify-center">
-                <div className="text-center mt-8">
-                  <div className="text-2xl font-bold font-mono text-white">{onDuty + onBreak}</div>
-                  <div className="text-[10px] text-slate-400 uppercase">Present</div>
-                </div>
+            {/* Modern High-Contrast Multi-Colored Circular Gauge */}
+            <div className="relative w-44 h-44 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                {/* Background Ring */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="38"
+                  className="stroke-slate-100 dark:stroke-slate-800"
+                  strokeWidth="8"
+                  fill="none"
+                />
+                {/* Present Active Arc (Emerald) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="38"
+                  stroke="#10B981"
+                  strokeWidth="8"
+                  strokeDasharray="238.76"
+                  strokeDashoffset={238.76 - (238.76 * ((onDuty + onBreak) / (totalEmployees || 1)))}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                {/* Break Arc Overlay (Amber) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="38"
+                  stroke="#F59E0B"
+                  strokeWidth="8"
+                  strokeDasharray="238.76"
+                  strokeDashoffset={238.76 - (238.76 * (onBreak / (totalEmployees || 1)))}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+
+              {/* Center Metrics Readout */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-3xl font-extrabold font-mono text-slate-900 dark:text-white">
+                  {onDuty + onBreak}
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
+                  PRESENT
+                </span>
               </div>
             </div>
 
-            <div className="w-full grid grid-cols-4 gap-2 text-center mt-6 text-xs">
-              <div>
-                <div className="w-2 h-2 rounded-full bg-emerald-400 mx-auto mb-1"></div>
-                <div className="text-[10px] text-slate-400">On Duty</div>
-                <div className="font-bold text-white font-mono">{onDuty}</div>
+            {/* Metric Status Chips with High Contrast Badges */}
+            <div className="w-full grid grid-cols-4 gap-2 text-center mt-4">
+              <div className="p-2 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto mb-1"></div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">On Duty</div>
+                <div className="font-bold text-slate-900 dark:text-white font-mono text-sm mt-0.5">{onDuty}</div>
               </div>
-              <div>
-                <div className="w-2 h-2 rounded-full bg-amber-400 mx-auto mb-1"></div>
-                <div className="text-[10px] text-slate-400">Break</div>
-                <div className="font-bold text-white font-mono">{onBreak}</div>
+              <div className="p-2 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
+                <div className="w-2 h-2 rounded-full bg-amber-500 mx-auto mb-1"></div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Break</div>
+                <div className="font-bold text-slate-900 dark:text-white font-mono text-sm mt-0.5">{onBreak}</div>
               </div>
-              <div>
-                <div className="w-2 h-2 rounded-full bg-blue-400 mx-auto mb-1"></div>
-                <div className="text-[10px] text-slate-400">Leave</div>
-                <div className="font-bold text-white font-mono">{onLeave}</div>
+              <div className="p-2 rounded-lg bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mx-auto mb-1"></div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Leave</div>
+                <div className="font-bold text-slate-900 dark:text-white font-mono text-sm mt-0.5">{onLeave}</div>
               </div>
-              <div>
-                <div className="w-2 h-2 rounded-full bg-rose-400 mx-auto mb-1"></div>
-                <div className="text-[10px] text-slate-400">Absent</div>
-                <div className="font-bold text-white font-mono">{absent}</div>
+              <div className="p-2 rounded-lg bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
+                <div className="w-2 h-2 rounded-full bg-rose-500 mx-auto mb-1"></div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">Absent</div>
+                <div className="font-bold text-slate-900 dark:text-white font-mono text-sm mt-0.5">{absent}</div>
               </div>
             </div>
           </div>
 
-          <div className="text-center pt-2 border-t border-slate-800">
-            <span className="text-xs text-slate-400">
-              Floor Efficiency Rate:{' '}
-              <span className="text-emerald-400 font-bold font-mono">
-                {Math.round(((onDuty + onBreak) / totalEmployees) * 100)}%
+          <div className="text-center pt-3 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Floor Attendance Rate:{' '}
+              <span className="text-emerald-600 dark:text-emerald-400 font-extrabold font-mono text-sm">
+                {Math.round(((onDuty + onBreak) / (totalEmployees || 1)) * 100)}%
               </span>
             </span>
           </div>
