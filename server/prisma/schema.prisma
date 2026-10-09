@@ -1,0 +1,148 @@
+// Prisma Schema for SmartHR Enterprise System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User role enum emulation for SQLite
+// Roles: ADMIN, HR, MANAGER, EMPLOYEE
+// Status: ACTIVE, SUSPENDED
+
+model Department {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  code        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  employees   Employee[]
+}
+
+model Employee {
+  id             String       @id @default(uuid())
+  employeeCode   String       @unique // e.g. SHR-1001
+  firstName      String
+  lastName       String
+  email          String       @unique
+  password       String
+  role           String       @default("EMPLOYEE") // ADMIN, HR, MANAGER, EMPLOYEE
+  status         String       @default("ACTIVE")   // ACTIVE, SUSPENDED
+  designation    String
+  departmentId   String?
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  managerId      String?
+  manager        Employee?    @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates   Employee[]   @relation("ManagerSubordinates")
+  phone          String?
+  joinDate       DateTime     @default(now())
+  hourlyRate     Float        @default(25.0)
+  baseSalary     Float        @default(4500.0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  attendances    Attendance[]
+  leaveRequests  LeaveRequest[] @relation("EmployeeLeaves")
+  approvedLeaves LeaveRequest[] @relation("ApprovedLeaves")
+  leaveBalances  LeaveBalance[]
+  payrolls       Payroll[]
+  auditLogs      AuditLog[]
+}
+
+model Attendance {
+  id             String         @id @default(uuid())
+  employeeId     String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date           String         // Format: YYYY-MM-DD for fast single-record-per-day lookups
+  clockIn        DateTime
+  clockOut       DateTime?
+  status         String         @default("PRESENT") // PRESENT, LATE, HALF_DAY, ABSENT
+  totalWorkMins  Int            @default(0)
+  totalBreakMins Int            @default(0)
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  breaks         BreakSession[]
+
+  @@unique([employeeId, date])
+}
+
+model BreakSession {
+  id           String     @id @default(uuid())
+  attendanceId String
+  attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  type         String     // LUNCH, TEA, EMERGENCY
+  startTime    DateTime
+  endTime      DateTime?
+  durationMins Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model LeaveBalance {
+  id           String    @id @default(uuid())
+  employeeId   String
+  employee     Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType    String    // ANNUAL, MEDICAL, CASUAL, UNPAID
+  allocated    Float     @default(14.0)
+  used         Float     @default(0.0)
+  year         Int       @default(2026)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([employeeId, leaveType, year])
+}
+
+model LeaveRequest {
+  id          String     @id @default(uuid())
+  employeeId  String
+  employee    Employee   @relation("EmployeeLeaves", fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType   String     // ANNUAL, MEDICAL, CASUAL, UNPAID
+  startDate   DateTime
+  endDate     DateTime
+  daysCount   Float
+  reason      String
+  status      String     @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  approverId  String?
+  approver    Employee?  @relation("ApprovedLeaves", fields: [approverId], references: [id])
+  reviewNotes String?
+  reviewedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Payroll {
+  id               String    @id @default(uuid())
+  employeeId       String
+  employee         Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  month            Int       // 1 - 12
+  year             Int       // e.g. 2026
+  baseSalary       Float
+  daysWorked       Int       @default(0)
+  unpaidLeaveDays  Float     @default(0.0)
+  deductions       Float     @default(0.0)
+  bonuses          Float     @default(0.0)
+  netSalary        Float
+  status           String    @default("DRAFT") // DRAFT, REVIEWED, APPROVED, PAID
+  notes            String?
+  generatedAt      DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([employeeId, month, year])
+}
+
+model AuditLog {
+  id         String    @id @default(uuid())
+  userId     String?
+  user       Employee? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String    // e.g. CLOCK_IN, LEAVE_APPROVED, PAYROLL_GENERATED, ROLE_UPDATED
+  resource   String    // ATTENDANCE, LEAVE, PAYROLL, EMPLOYEE, AUTH
+  details    String?
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+}
