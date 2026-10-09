@@ -32,7 +32,71 @@
   }
 }
 
-/* Custom scrollbars for enterprise data tables */
+/* Light Theme Automatic Contrast Adaptations */
+html:not(.dark) {
+  /* Headings & prominent text */
+  h1, h2, h3, h4, h5, h6 {
+    color: #0F172A !important;
+  }
+
+  /* Neutralize hardcoded text-white in light mode */
+  .text-white {
+    color: #0F172A !important;
+  }
+
+  /* Keep deliberate white text on solid colored buttons */
+  button.bg-emerald-600,
+  button.bg-emerald-500,
+  button.bg-rose-600,
+  button.bg-blue-600,
+  button.bg-amber-600,
+  .bg-emerald-600 .text-white,
+  .bg-emerald-500 .text-white,
+  .bg-rose-600 .text-white {
+    color: #FFFFFF !important;
+  }
+
+  /* Make dark container panels crisp white with subtle borders */
+  .bg-\[\#0F172A\],
+  .bg-\[\#0D1424\],
+  .bg-slate-900,
+  .bg-slate-900\/80,
+  .bg-slate-900\/90 {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+  }
+
+  .bg-\[\#0C1322\],
+  .bg-slate-850,
+  .bg-slate-800 {
+    background-color: #F8FAFC !important;
+    border-color: #E2E8F0 !important;
+  }
+
+  .border-slate-800,
+  .border-slate-750,
+  .border-slate-700 {
+    border-color: #E2E8F0 !important;
+  }
+
+  /* Subtitle and muted text in light mode */
+  .text-slate-400,
+  .text-slate-300 {
+    color: #475569 !important;
+  }
+
+  .text-slate-500 {
+    color: #64748B !important;
+  }
+
+  /* Table hover in light mode */
+  .hover\:bg-slate-850\/50:hover,
+  .hover\:bg-slate-800\/60:hover {
+    background-color: #F1F5F9 !important;
+  }
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
