@@ -97,10 +97,10 @@ export const LeaveManagement = () => {
       {/* Toast Alert */}
       {message.text && (
         <div
-          className={`p-4 rounded-xl border flex items-center space-x-3 text-sm transition-all shadow-lg ${
+          className={`p-4 rounded-xl border flex items-center space-x-3 text-sm transition-all shadow-md ${
             message.type === 'error'
-              ? 'bg-rose-950/80 border-rose-800 text-rose-200'
-              : 'bg-emerald-950/80 border-emerald-800 text-emerald-200'
+              ? 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/80 dark:border-rose-800 dark:text-rose-200'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/80 dark:border-emerald-800 dark:text-emerald-200'
           }`}
         >
           {message.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
@@ -111,17 +111,19 @@ export const LeaveManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Leave Management Lifecycle</h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Leave Management Lifecycle
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Policy-based allocations, quota deductions, and manager approval audit trails.
           </p>
         </div>
 
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-950/50 transition cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer"
         >
-          <PlusCircle size={16} />
+          <PlusCircle size={15} />
           <span>Apply for Leave</span>
         </button>
       </div>
@@ -132,28 +134,28 @@ export const LeaveManagement = () => {
           const remaining = Math.max(0, b.allocated - b.used);
           const percentUsed = Math.round((b.used / b.allocated) * 100) || 0;
           return (
-            <div key={b.id} className="bg-[#0F172A] border border-slate-800 rounded-xl p-5 shadow-sm">
+            <div key={b.id} className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs transition-colors">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   {b.leaveType} LEAVE
                 </span>
-                <span className="text-xs font-mono text-emerald-400 font-medium">
+                <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                   {remaining}d left
                 </span>
               </div>
 
-              <div className="text-3xl font-bold text-white mt-2">
-                {remaining} <span className="text-sm font-normal text-slate-400">/ {b.allocated}d</span>
+              <div className="text-3xl font-bold font-mono text-slate-900 dark:text-white mt-2">
+                {remaining} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">/ {b.allocated}d</span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
                 <div
                   className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${percentUsed}%` }}
                 ></div>
               </div>
-              <div className="text-[11px] text-slate-300 mt-1.5 flex justify-between">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex justify-between">
                 <span>Used: {b.used} days</span>
                 <span>Year: {b.year}</span>
               </div>
@@ -163,22 +165,22 @@ export const LeaveManagement = () => {
       </div>
 
       {/* Leave Requests Log */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <FileText size={18} className="text-slate-400" />
-            <h3 className="font-semibold text-white text-base">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm">
               {canApprove ? 'Leave Applications & Approval Workflow' : 'My Leave Requests'}
             </h3>
           </div>
-          <span className="text-xs text-slate-300 font-mono">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
             {requests.length} applications total
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#0C1322] text-slate-300 uppercase text-[11px] font-semibold tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
               <tr>
                 <th className="py-3 px-5">Applicant</th>
                 <th className="py-3 px-4">Type</th>
@@ -189,7 +191,7 @@ export const LeaveManagement = () => {
                 <th className="py-3 px-5 text-right">Approval Decision</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {requests.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-400">
@@ -200,43 +202,43 @@ export const LeaveManagement = () => {
                 requests.map((r) => {
                   const isPending = r.status === 'PENDING';
                   return (
-                    <tr key={r.id} className="hover:bg-slate-850/50 transition-colors">
+                    <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="py-3 px-5">
-                        <div className="font-medium text-white">
+                        <div className="font-bold text-slate-900 dark:text-white">
                           {r.employee?.firstName} {r.employee?.lastName}
                         </div>
-                        <div className="text-xs text-slate-300 font-mono">
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                           {r.employee?.employeeCode}
                         </div>
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                           {r.leaveType}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-xs font-mono text-slate-300">
+                      <td className="py-3 px-4 text-xs font-mono text-slate-600 dark:text-slate-300">
                         {new Date(r.startDate).toLocaleDateString()} &rarr;{' '}
                         {new Date(r.endDate).toLocaleDateString()}
                       </td>
 
-                      <td className="py-3 px-4 text-xs font-semibold text-white font-mono">
+                      <td className="py-3 px-4 text-xs font-bold text-slate-900 dark:text-white font-mono">
                         {r.daysCount} d
                       </td>
 
-                      <td className="py-3 px-4 text-xs text-slate-300 max-w-xs truncate">
+                      <td className="py-3 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs truncate">
                         {r.reason}
                       </td>
 
                       <td className="py-3 px-4">
                         <span
-                          className={`text-xs px-2 py-0.5 rounded font-semibold border ${
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             r.status === 'APPROVED'
-                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                               : r.status === 'REJECTED'
-                              ? 'bg-rose-950 text-rose-300 border-rose-800'
-                              : 'bg-amber-950 text-amber-300 border-amber-800'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
+                              : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
                           }`}
                         >
                           {r.status}
@@ -255,7 +257,7 @@ export const LeaveManagement = () => {
                                   notes: 'Approved without reservations.'
                                 })
                               }
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 text-xs font-medium transition cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/40 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-bold transition cursor-pointer"
                             >
                               Approve
                             </button>
@@ -268,13 +270,13 @@ export const LeaveManagement = () => {
                                   notes: 'Requires project schedule adjustment.'
                                 })
                               }
-                              className="px-2.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 text-xs font-medium transition cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-600/20 dark:hover:bg-rose-600/40 dark:text-rose-300 dark:border-rose-500/30 text-xs font-bold transition cursor-pointer"
                             >
                               Reject
                             </button>
                           </div>
                         ) : (
-                          <div className="text-xs text-slate-300">
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
                             {r.approver
                               ? `Reviewed by ${r.approver.firstName}`
                               : isPending
@@ -294,22 +296,22 @@ export const LeaveManagement = () => {
 
       {/* Modal: New Leave Application */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white">Apply for Leave Request</h3>
-            <p className="text-xs text-slate-400">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Apply for Leave Request</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Allocated quota will be deducted automatically upon manager authorization.
             </p>
 
             <form onSubmit={handleApply} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Leave Category
                 </label>
                 <select
                   value={leaveType}
                   onChange={(e) => setLeaveType(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="ANNUAL">Annual Paid Leave</option>
                   <option value="MEDICAL">Medical Leave</option>
@@ -320,7 +322,7 @@ export const LeaveManagement = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Start Date
                   </label>
                   <input
@@ -328,11 +330,11 @@ export const LeaveManagement = () => {
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     End Date
                   </label>
                   <input
@@ -340,13 +342,13 @@ export const LeaveManagement = () => {
                     required
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Days Count
                 </label>
                 <input
@@ -356,12 +358,12 @@ export const LeaveManagement = () => {
                   required
                   value={daysCount}
                   onChange={(e) => setDaysCount(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Reason & Notes
                 </label>
                 <textarea
@@ -370,21 +372,21 @@ export const LeaveManagement = () => {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain purpose of leave..."
-                  className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                 ></textarea>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer"
                 >
                   Submit Application
                 </button>
@@ -396,41 +398,41 @@ export const LeaveManagement = () => {
 
       {/* Modal: Review & Decision Audit */}
       {reviewModal.open && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <UserCheck size={20} className="text-emerald-400" />
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <UserCheck size={20} className="text-emerald-500" />
               <span>Confirm {reviewModal.action} Decision</span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Applicant: {reviewModal.req?.employee?.firstName} {reviewModal.req?.employee?.lastName} (
               {reviewModal.req?.daysCount} days {reviewModal.req?.leaveType})
             </p>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Approver Audit Notes / Feedback
               </label>
               <textarea
                 rows={3}
                 value={reviewModal.notes}
                 onChange={(e) => setReviewModal({ ...reviewModal, notes: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-750 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
               ></textarea>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setReviewModal({ open: false, req: null, action: '', notes: '' })}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Dismiss
               </button>
               <button
                 type="button"
                 onClick={handleReviewSubmit}
-                className={`px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md transition cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-white text-xs font-bold shadow-sm transition cursor-pointer ${
                   reviewModal.action === 'APPROVED'
                     ? 'bg-emerald-600 hover:bg-emerald-500'
                     : 'bg-rose-600 hover:bg-rose-500'
