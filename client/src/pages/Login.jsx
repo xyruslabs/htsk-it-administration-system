@@ -154,7 +154,7 @@ export const Login = () => {
       <div className="w-full max-w-md bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-8 relative z-10 transition-colors">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <SmartHRLogo className="w-16 h-16" />
+            <SmartHRLogo className="w-14 h-14" textSize="text-3xl" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Smart<span className="text-emerald-500 font-extrabold">HR</span> Enterprise

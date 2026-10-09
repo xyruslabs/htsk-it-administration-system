@@ -121,18 +121,7 @@ export const Layout = ({ children }) => {
         <div>
           {/* Logo Header */}
           <div className="px-5 py-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <SmartHRLogo className="w-10 h-10" />
-              <div>
-                <div className="font-bold text-base tracking-wide text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <span>Smart<span className="text-emerald-500 font-extrabold">HR</span></span>
-                  <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                    ENT
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Enterprise Workforce</p>
-              </div>
-            </div>
+            <SmartHRLogo className="w-10 h-10" textSize="text-xl" showText={true} />
           </div>
 
           {/* Current User Quick Info */}
