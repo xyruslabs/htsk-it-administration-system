@@ -121,8 +121,8 @@ export const Layout = ({ children }) => {
         <div>
           {/* Logo Header */}
           <div className="px-5 py-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <SmartHRLogo className="w-9 h-9" />
+            <div className="flex items-center space-x-3">
+              <SmartHRLogo className="w-10 h-10" />
               <div>
                 <div className="font-bold text-base tracking-wide text-slate-900 dark:text-white flex items-center gap-1.5">
                   <span>Smart<span className="text-emerald-500 font-extrabold">HR</span></span>
