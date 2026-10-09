@@ -1,14 +1,15 @@
 import React from 'react';
+import emblemImg from '../assets/smarthr_badge.png';
 
-export const SmartHRLogo = ({ className = "w-10 h-10", textSize = "text-xl", showText = false }) => {
+export const SmartHRLogo = ({ className = "w-10 h-10", showText = false, textClassName = "text-base" }) => {
   return (
     <div className="flex items-center gap-3 shrink-0 select-none">
-      {/* Signature SmartHR Gradient Emerald-Teal Emblem Badge */}
-      <div
-        className={`${className} rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 flex items-center justify-center font-black text-white ${textSize} shadow-lg shadow-emerald-950/40 ring-1 ring-white/20 shrink-0 transform transition-transform hover:scale-105`}
-      >
-        S
-      </div>
+      {/* High-Resolution Concept 2 Connected Shield Badge */}
+      <img
+        src={emblemImg}
+        alt="SmartHR Logo"
+        className={`${className} object-contain rounded-xl shadow-lg shadow-emerald-950/30 ring-1 ring-emerald-500/30 transform transition-transform duration-200 hover:scale-105 shrink-0`}
+      />
 
       {showText && (
         <div className="flex flex-col">
