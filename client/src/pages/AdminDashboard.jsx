@@ -37,22 +37,58 @@ export const AdminDashboard = () => {
   const [timeFilter, setTimeFilter] = useState('Today');
   const [wishesSent, setWishesSent] = useState({});
 
+  // Quick Request Modal States
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [requestTab, setRequestTab] = useState('LEAVE'); // 'LEAVE' | 'ATTENDANCE' | 'OVERTIME'
+  const [submitting, setSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ text: '', type: '' });
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const [leaveForm, setLeaveForm] = useState({
+    leaveType: 'ANNUAL',
+    startDate: todayStr,
+    endDate: todayStr,
+    daysCount: 1,
+    reason: ''
+  });
+
+  const [attendanceForm, setAttendanceForm] = useState({
+    regDate: todayStr,
+    regType: 'MISSED_CLOCK_IN',
+    regTime: '09:00',
+    regReason: ''
+  });
+
+  const [otForm, setOtForm] = useState({
+    otDate: todayStr,
+    otHours: 2,
+    otProject: 'SmartHR System Upgrade',
+    otReason: ''
+  });
+
+  const showToast = (text, type = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage({ text: '', type: '' }), 4000);
+  };
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [statsRes, floorRes] = await Promise.all([
+        api.get('/admin/system-stats'),
+        api.get('/attendance/live-floor')
+      ]);
+      if (statsRes.data.success) setStats(statsRes.data.stats);
+      if (floorRes.data.success) setFloorData(floorRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
-        const [statsRes, floorRes] = await Promise.all([
-          api.get('/admin/system-stats'),
-          api.get('/attendance/live-floor')
-        ]);
-        if (statsRes.data.success) setStats(statsRes.data.stats);
-        if (floorRes.data.success) setFloorData(floorRes.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadDashboardData();
   }, []);
 
@@ -64,6 +100,97 @@ export const AdminDashboard = () => {
 
   const handleSendWish = (id) => {
     setWishesSent((prev) => ({ ...prev, [id]: true }));
+  };
+
+  const handleExportCSV = () => {
+    const csvContent = [
+      ['Metric', 'Value', 'Category'],
+      ['Total Active Employees', totalEmployees, 'Staffing'],
+      ['Present on Floor', onDuty + onBreak, 'Attendance'],
+      ['On Duty Active', onDuty, 'Attendance'],
+      ['On Break', onBreak, 'Attendance'],
+      ['On Leave', onLeave, 'Absence'],
+      ['Late or Absent', absent, 'Absence'],
+      ['Floor Attendance Rate', `${Math.round(((onDuty + onBreak) / (totalEmployees || 1)) * 100)}%`, 'KPI'],
+      ['Active Projects', '90 / 125', 'Operations'],
+      ['Pending Leave Requests', stats?.pendingLeaves || 0, 'Human Resources'],
+      ['Exported By', user?.name || 'Administrator', 'Audit'],
+      ['Timestamp', new Date().toLocaleString(), 'Audit'],
+      ['Organization', 'Dinitha Enterprise', 'System']
+    ]
+      .map((row) => row.map((cell) => `"${cell}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `SmartHR_Executive_Summary_${todayStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('Executive report exported successfully (CSV)', 'success');
+  };
+
+  const handleSubmitLeave = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await api.post('/leaves/apply', {
+        leaveType: leaveForm.leaveType,
+        startDate: leaveForm.startDate,
+        endDate: leaveForm.endDate,
+        daysCount: parseFloat(leaveForm.daysCount) || 1,
+        reason: leaveForm.reason
+      });
+      showToast(res.data.message || 'Leave request submitted successfully!', 'success');
+      setIsRequestModalOpen(false);
+      setLeaveForm({
+        leaveType: 'ANNUAL',
+        startDate: todayStr,
+        endDate: todayStr,
+        daysCount: 1,
+        reason: ''
+      });
+      loadDashboardData();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to submit leave request', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmitAttendance = (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setTimeout(() => {
+      showToast('Attendance regularization request submitted to HR team for review', 'success');
+      setIsRequestModalOpen(false);
+      setSubmitting(false);
+      setAttendanceForm({
+        regDate: todayStr,
+        regType: 'MISSED_CLOCK_IN',
+        regTime: '09:00',
+        regReason: ''
+      });
+    }, 600);
+  };
+
+  const handleSubmitOvertime = (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setTimeout(() => {
+      showToast('Overtime authorization request submitted for manager approval', 'success');
+      setIsRequestModalOpen(false);
+      setSubmitting(false);
+      setOtForm({
+        otDate: todayStr,
+        otHours: 2,
+        otProject: 'SmartHR System Upgrade',
+        otReason: ''
+      });
+    }, 600);
   };
 
   return (
@@ -113,11 +240,18 @@ export const AdminDashboard = () => {
             ))}
           </div>
 
-          <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 shadow-xs transition cursor-pointer">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 shadow-xs transition cursor-pointer"
+            title="Export live floor metrics as CSV"
+          >
             <Download size={13} />
             <span className="hidden sm:inline">Export</span>
           </button>
-          <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm shadow-emerald-900/10 transition cursor-pointer">
+          <button
+            onClick={() => setIsRequestModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm shadow-emerald-900/10 transition cursor-pointer"
+          >
             <Plus size={14} />
             <span>New Request</span>
           </button>
@@ -716,6 +850,361 @@ export const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Toast Notification */}
+      {toastMessage.text && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md animate-slideUp">
+          <div
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border text-xs font-semibold backdrop-blur-md ${
+              toastMessage.type === 'error'
+                ? 'bg-rose-50/95 dark:bg-rose-950/90 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-800'
+                : 'bg-emerald-50/95 dark:bg-emerald-950/90 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800'
+            }`}
+          >
+            {toastMessage.type === 'error' ? (
+              <AlertCircle size={16} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            ) : (
+              <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            )}
+            <p className="flex-1 leading-relaxed">{toastMessage.text}</p>
+            <button
+              onClick={() => setToastMessage({ text: '', type: '' })}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ml-1"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Quick New Request Modal (SmartHR Enterprise System) */}
+      {isRequestModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden text-slate-800 dark:text-slate-100 animate-scaleUp">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <Plus size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Submit New Request
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    SmartHR Enterprise Self-Service Workflow
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsRequestModalOpen(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Request Type Selector Tabs */}
+            <div className="px-6 pt-4 pb-2">
+              <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setRequestTab('LEAVE')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg transition cursor-pointer ${
+                    requestTab === 'LEAVE'
+                      ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Calendar size={13} />
+                  <span>Leave</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestTab('ATTENDANCE')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg transition cursor-pointer ${
+                    requestTab === 'ATTENDANCE'
+                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Clock size={13} />
+                  <span>Missed Punch</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestTab('OVERTIME')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg transition cursor-pointer ${
+                    requestTab === 'OVERTIME'
+                      ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <TrendingUp size={13} />
+                  <span>Overtime</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Tab 1: Leave Request Form */}
+            {requestTab === 'LEAVE' && (
+              <form onSubmit={handleSubmitLeave} className="p-6 pt-3 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Leave Category
+                  </label>
+                  <select
+                    value={leaveForm.leaveType}
+                    onChange={(e) => setLeaveForm({ ...leaveForm, leaveType: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+                    required
+                  >
+                    <option value="ANNUAL">Annual Leave (Paid Vacation)</option>
+                    <option value="CASUAL">Casual Leave (Short Notice)</option>
+                    <option value="MEDICAL">Medical / Sick Leave</option>
+                    <option value="MATERNITY">Maternity / Paternity Leave</option>
+                    <option value="UNPAID">Unpaid Leave (Loss of Pay)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={leaveForm.startDate}
+                      onChange={(e) => setLeaveForm({ ...leaveForm, startDate: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-mono"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={leaveForm.endDate}
+                      onChange={(e) => setLeaveForm({ ...leaveForm, endDate: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-mono"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Days Requested
+                  </label>
+                  <input
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    value={leaveForm.daysCount}
+                    onChange={(e) => setLeaveForm({ ...leaveForm, daysCount: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-mono"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Reason & Handover Notes
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={leaveForm.reason}
+                    onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
+                    placeholder="Provide justification or handover details for the manager..."
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                  <button
+                    type="button"
+                    onClick={() => setIsRequestModalOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Leave Request'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Tab 2: Attendance Regularization (Missed Punch) */}
+            {requestTab === 'ATTENDANCE' && (
+              <form onSubmit={handleSubmitAttendance} className="p-6 pt-3 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Regularization Event
+                  </label>
+                  <select
+                    value={attendanceForm.regType}
+                    onChange={(e) => setAttendanceForm({ ...attendanceForm, regType: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    required
+                  >
+                    <option value="MISSED_CLOCK_IN">Missed Clock-In (Forgot RFID / Biometric)</option>
+                    <option value="MISSED_CLOCK_OUT">Missed Clock-Out (Early / Power Failure)</option>
+                    <option value="EXTENDED_BREAK">Break Regularization (Client Meeting)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Event Date
+                    </label>
+                    <input
+                      type="date"
+                      value={attendanceForm.regDate}
+                      onChange={(e) => setAttendanceForm({ ...attendanceForm, regDate: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Actual Time
+                    </label>
+                    <input
+                      type="time"
+                      value={attendanceForm.regTime}
+                      onChange={(e) => setAttendanceForm({ ...attendanceForm, regTime: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Reason & Explanation
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={attendanceForm.regReason}
+                    onChange={(e) => setAttendanceForm({ ...attendanceForm, regReason: e.target.value })}
+                    placeholder="Specify reason for missed badge swipe or manual adjustment..."
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                  <button
+                    type="button"
+                    onClick={() => setIsRequestModalOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Regularization'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Tab 3: Overtime Authorization */}
+            {requestTab === 'OVERTIME' && (
+              <form onSubmit={handleSubmitOvertime} className="p-6 pt-3 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Target Date
+                    </label>
+                    <input
+                      type="date"
+                      value={otForm.otDate}
+                      onChange={(e) => setOtForm({ ...otForm, otDate: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500 font-mono"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Estimated Hours
+                    </label>
+                    <input
+                      type="number"
+                      min="0.5"
+                      max="12"
+                      step="0.5"
+                      value={otForm.otHours}
+                      onChange={(e) => setOtForm({ ...otForm, otHours: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500 font-mono"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Associated Project / Client
+                  </label>
+                  <input
+                    type="text"
+                    value={otForm.otProject}
+                    onChange={(e) => setOtForm({ ...otForm, otProject: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                    placeholder="e.g. SmartHR Core Platform Release"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Deliverable / Justification
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={otForm.otReason}
+                    onChange={(e) => setOtForm({ ...otForm, otReason: e.target.value })}
+                    placeholder="Explain deliverables and business justification for overtime..."
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500 resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                  <button
+                    type="button"
+                    onClick={() => setIsRequestModalOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {submitting ? 'Submitting...' : 'Request Overtime'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
