@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { SmartHRLogo } from '../components/SmartHRLogo';
 import api from '../api/axios';
 import {
   Lock,
@@ -152,11 +153,11 @@ export const Login = () => {
 
       <div className="w-full max-w-md bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-8 relative z-10 transition-colors">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-700 mx-auto flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-900/40 mb-3 ring-1 ring-white/10">
-            S
+          <div className="flex justify-center mb-3">
+            <SmartHRLogo className="w-16 h-16" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-            SmartHR Enterprise
+            Smart<span className="text-emerald-500 font-extrabold">HR</span> Enterprise
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Single Sign-On Workforce Portal</p>
         </div>

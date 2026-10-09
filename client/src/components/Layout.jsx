@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { SmartHRLogo } from './SmartHRLogo';
 import {
   LayoutDashboard,
   Clock,
@@ -93,12 +94,7 @@ export const Layout = ({ children }) => {
     <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-800 dark:text-slate-100 flex flex-col md:flex-row antialiased transition-colors duration-200">
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-[#0F172A] border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-900/40">
-            S
-          </div>
-          <span className="font-semibold text-lg tracking-tight text-slate-900 dark:text-white">SmartHR</span>
-        </div>
+        <SmartHRLogo className="w-8 h-8" showText={true} textClassName="text-lg" />
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleTheme}
@@ -124,19 +120,17 @@ export const Layout = ({ children }) => {
       >
         <div>
           {/* Logo Header */}
-          <div className="px-6 py-6 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center font-black text-white text-lg shadow-md shadow-emerald-950/60 ring-1 ring-white/10">
-                S
-              </div>
+          <div className="px-5 py-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <SmartHRLogo className="w-9 h-9" />
               <div>
                 <div className="font-bold text-base tracking-wide text-slate-900 dark:text-white flex items-center gap-1.5">
-                  SmartHR
+                  <span>Smart<span className="text-emerald-500 font-extrabold">HR</span></span>
                   <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                     ENT
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Enterprise Workforce</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Enterprise Workforce</p>
               </div>
             </div>
           </div>
