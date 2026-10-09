@@ -268,7 +268,7 @@ export const AdminDashboard = () => {
               Live Today
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             {onDuty + onBreak} / {totalEmployees}
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -288,7 +288,7 @@ export const AdminDashboard = () => {
               Active
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             90 / 125
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -307,7 +307,7 @@ export const AdminDashboard = () => {
               SaaS
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             69 / 86
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -326,7 +326,7 @@ export const AdminDashboard = () => {
               Sprint
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             96 / 100
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -343,7 +343,7 @@ export const AdminDashboard = () => {
             <span className="text-slate-500 dark:text-slate-400 font-medium">Monthly Payroll</span>
             <DollarSign size={14} className="text-emerald-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 dark:text-emerald-400 mt-2 font-display tracking-tight">
             $32,700
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -360,7 +360,7 @@ export const AdminDashboard = () => {
             <span className="text-slate-500 dark:text-slate-400 font-medium">Operating Margin</span>
             <TrendingUp size={14} className="text-blue-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             $5,544
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -377,7 +377,7 @@ export const AdminDashboard = () => {
             <span className="text-slate-500 dark:text-slate-400 font-medium">Candidate Talent</span>
             <Users size={14} className="text-purple-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             98
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -394,7 +394,7 @@ export const AdminDashboard = () => {
             <span className="text-slate-500 dark:text-slate-400 font-medium">New Hires</span>
             <UserCheck size={14} className="text-amber-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight">
+          <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
             45 / 48
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
@@ -429,7 +429,7 @@ export const AdminDashboard = () => {
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
                 Present On Floor
               </div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-[#D2FD41] mt-1 tracking-tight">
+              <div className="font-display font-bold text-2xl sm:text-3xl text-[#D2FD41] mt-1 tracking-tight">
                 {Math.round(((onDuty + onBreak) / (totalEmployees || 1)) * 100)}%
               </div>
               <p className="text-[10px] text-slate-400 mt-0.5">SLA Target: 90%</p>
@@ -439,7 +439,7 @@ export const AdminDashboard = () => {
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
                 Break Compliance
               </div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-white mt-1 tracking-tight">
+              <div className="font-display font-bold text-2xl sm:text-3xl text-white mt-1 tracking-tight">
                 99.4%
               </div>
               <p className="text-[10px] text-slate-400 mt-0.5">Zero drift logged</p>
@@ -455,7 +455,7 @@ export const AdminDashboard = () => {
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D2FD41] font-display">
                   Real-Time Floor Frequency
                 </span>
-                <h3 className="font-display font-black text-xl sm:text-2xl text-white mt-0.5 tracking-tight">
+                <h3 className="font-display font-bold text-xl sm:text-2xl text-white mt-0.5 tracking-tight">
                   Active Shift Velocity & Roster Load
                 </h3>
               </div>
@@ -490,25 +490,25 @@ export const AdminDashboard = () => {
           {/* 4 Large Clean Stats Strip from Reference Slide 4 (40+, 6, 600K $, 1 click) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-5 border-t border-white/[0.08]">
             <div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
                 {totalEmployees}+
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5 font-medium">Active Personnel</div>
             </div>
             <div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
                 6
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5 font-medium">Departments</div>
             </div>
             <div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-[#D2FD41] tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-[#D2FD41] tracking-tight">
                 99.9%
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5 font-medium">System Uptime</div>
             </div>
             <div>
-              <div className="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
                 1 Click
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5 font-medium">HR Approval</div>
