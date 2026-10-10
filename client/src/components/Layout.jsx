@@ -604,6 +604,16 @@ export const Layout = ({ children }) => {
                     <CalendarDays size={14} className="text-slate-400" />
                     <span>Leave Requests</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      window.dispatchEvent(new CustomEvent('replay-splash'));
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles size={14} className="text-[#D2FD41]" />
+                    <span>Replay Intro Animation</span>
+                  </button>
                   <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
                   <button
                     onClick={logout}

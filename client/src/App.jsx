@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { SplashScreen } from './components/SplashScreen';
 
 import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -15,9 +16,18 @@ import { Payroll } from './pages/Payroll';
 import { AuditLogs } from './pages/AuditLogs';
 
 export function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const handleReplay = () => setShowSplash(true);
+    window.addEventListener('replay-splash', handleReplay);
+    return () => window.removeEventListener('replay-splash', handleReplay);
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>
+        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
         <BrowserRouter>
         <Routes>
           {/* Public login portal */}
