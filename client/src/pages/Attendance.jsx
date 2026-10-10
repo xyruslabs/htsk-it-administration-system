@@ -16,7 +16,10 @@ import {
   Search,
   UserCheck,
   ArrowRightLeft,
-  X
+  X,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export const Attendance = () => {
@@ -25,6 +28,11 @@ export const Attendance = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
+  // Clock-in passcode verification state (Anti-Proxy)
+  const [clockInModalOpen, setClockInModalOpen] = useState(false);
+  const [clockInPassword, setClockInPassword] = useState('');
+  const [showClockInPassword, setShowClockInPassword] = useState(false);
 
   const [statusData, setStatusData] = useState(null);
   const [history, setHistory] = useState([]);
@@ -61,9 +69,17 @@ export const Attendance = () => {
         if (res.data.success && res.data.employees?.length > 0) {
           const list = res.data.employees;
           setEmployeesList(list);
-          // Default to logged-in user if found in list, else first active employee
-          const found = list.find((e) => e.id === user?.id || e.email === user?.email);
-          setSelectedEmployee(found || list[0]);
+          const isEmployeeRole = user?.role === 'EMPLOYEE' || user?.email === 'employee@smarthr.io';
+          const savedEmpId = sessionStorage.getItem('smarthr_selected_kiosk_emp');
+          const savedEmp = savedEmpId ? list.find((e) => e.id === savedEmpId) : null;
+
+          if (isEmployeeRole) {
+            // Restore previous choice in this session, or allow employee to select their name
+            setSelectedEmployee(savedEmp || null);
+          } else {
+            const found = list.find((e) => e.id === user?.id || e.email === user?.email);
+            setSelectedEmployee(savedEmp || found || list[0]);
+          }
         }
       } catch (err) {
         console.error('Failed to load employee list', err);
@@ -73,7 +89,11 @@ export const Attendance = () => {
   }, [user]);
 
   const fetchTodayStatus = async (empId = selectedEmployee?.id) => {
-    if (!empId) return;
+    if (!empId) {
+      setStatusData(null);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const res = await api.get(`/attendance/today?employeeId=${empId}`);
@@ -88,7 +108,10 @@ export const Attendance = () => {
   };
 
   const fetchHistory = async (empId = selectedEmployee?.id) => {
-    if (!empId) return;
+    if (!empId) {
+      setHistory([]);
+      return;
+    }
     try {
       const res = await api.get(`/attendance/history?employeeId=${empId}`);
       if (res.data.success) {
@@ -104,6 +127,9 @@ export const Attendance = () => {
     if (selectedEmployee?.id) {
       fetchTodayStatus(selectedEmployee.id);
       fetchHistory(selectedEmployee.id);
+    } else {
+      setStatusData(null);
+      setHistory([]);
     }
   }, [selectedEmployee?.id]);
 
@@ -112,16 +138,38 @@ export const Attendance = () => {
     setTimeout(() => setMessage({ text: '', type: '' }), 4000);
   };
 
-  const handleClockIn = async () => {
+  const handleOpenClockInModal = () => {
+    if (!selectedEmployee?.id) {
+      showToast('Please search or select your name first from the list.', 'error');
+      return;
+    }
+    setClockInPassword('');
+    setShowClockInPassword(false);
+    setClockInModalOpen(true);
+  };
+
+  const handleClockInSubmit = async (e) => {
+    e.preventDefault();
     if (!selectedEmployee?.id) return;
+    const trimmed = clockInPassword.trim();
+    if (trimmed.length < 3 || trimmed.length > 5) {
+      showToast('Passcode must be between 3 and 5 characters or digits.', 'error');
+      return;
+    }
+
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/clock-in', { employeeId: selectedEmployee.id });
+      const res = await api.post('/attendance/clock-in', {
+        employeeId: selectedEmployee.id,
+        password: trimmed
+      });
       showToast(`${res.data.message} (${selectedEmployee.firstName} ${selectedEmployee.lastName})`, 'success');
+      setClockInModalOpen(false);
+      setClockInPassword('');
       fetchTodayStatus(selectedEmployee.id);
       fetchHistory(selectedEmployee.id);
     } catch (err) {
-      showToast(err.response?.data?.message || 'Clock-in failed', 'error');
+      showToast(err.response?.data?.message || 'Clock-in verification failed. Please verify passcode.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -207,22 +255,26 @@ export const Attendance = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-[#D2FD41]/10 to-transparent text-emerald-600 dark:text-[#D2FD41] border border-emerald-500/30 flex items-center justify-center font-black text-base shadow-sm">
-              {selectedEmployee ? `${selectedEmployee.firstName[0]}${selectedEmployee.lastName[0]}` : 'EM'}
+              {selectedEmployee ? `${selectedEmployee.firstName[0]}${selectedEmployee.lastName[0]}` : <Users size={22} />}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 font-display">
-                  Active Employee Profile
+                  {selectedEmployee ? 'Active Employee Profile' : 'Workforce Attendance Terminal'}
                 </span>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
-                  {selectedEmployee?.employeeCode || 'SHR-000'}
-                </span>
+                {selectedEmployee && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                    {selectedEmployee.employeeCode}
+                  </span>
+                )}
               </div>
               <h3 className="text-lg font-black text-slate-900 dark:text-white font-display tracking-tight flex items-center gap-2 mt-0.5">
-                <span>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'Select Employee'}</span>
+                <span>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'Select or Filter Your Name'}</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {selectedEmployee?.designation || 'Specialist'} • <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedEmployee?.department?.name || 'SmartHR Operations'}</span>
+                {selectedEmployee
+                  ? `${selectedEmployee.designation || 'Specialist'} • ${selectedEmployee.department?.name || 'SmartHR Operations'}`
+                  : 'Universal terminal for all employees to record shift attendance and breaks.'}
               </p>
             </div>
           </div>
@@ -272,6 +324,7 @@ export const Attendance = () => {
                           type="button"
                           onClick={() => {
                             setSelectedEmployee(emp);
+                            sessionStorage.setItem('smarthr_selected_kiosk_emp', emp.id);
                             setIsSelectorOpen(false);
                             setEmployeeSearch('');
                           }}
@@ -317,10 +370,13 @@ export const Attendance = () => {
             <ArrowRightLeft size={12} />
             Quick Switch:
           </span>
-          {employeesList.slice(0, 6).map((emp) => (
+          {employeesList.slice(0, 8).map((emp) => (
             <button
               key={emp.id}
-              onClick={() => setSelectedEmployee(emp)}
+              onClick={() => {
+                setSelectedEmployee(emp);
+                sessionStorage.setItem('smarthr_selected_kiosk_emp', emp.id);
+              }}
               className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
                 selectedEmployee?.id === emp.id
                   ? 'bg-slate-900 text-white dark:bg-[#D2FD41] dark:text-[#0A0E1A] font-bold shadow-xs'
@@ -421,8 +477,9 @@ export const Attendance = () => {
             <div>
               {!hasClockedIn ? (
                 <button
-                  onClick={handleClockIn}
-                  disabled={actionLoading}
+                  type="button"
+                  onClick={handleOpenClockInModal}
+                  disabled={actionLoading || !selectedEmployee}
                   className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-sm transition cursor-pointer disabled:opacity-50"
                 >
                   <Play size={14} fill="white" />
@@ -591,6 +648,84 @@ export const Attendance = () => {
           </table>
         </div>
       </div>
+
+      {/* Clock-In Security Passcode Modal (Anti-Proxy) */}
+      {clockInModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <Lock size={17} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Authenticate Clock-In
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {selectedEmployee.firstName} {selectedEmployee.lastName} ({selectedEmployee.employeeCode})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setClockInModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleClockInSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Your Confidential Passcode (3–5 Characters)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showClockInPassword ? 'text' : 'password'}
+                    required
+                    minLength={3}
+                    maxLength={5}
+                    autoFocus
+                    value={clockInPassword}
+                    onChange={(e) => setClockInPassword(e.target.value)}
+                    placeholder="Enter 3–5 passcode (e.g. 1234)"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowClockInPassword(!showClockInPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    {showClockInPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+                  Anti-proxy protection ensures that only you can clock in for your shift.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setClockInModalOpen(false)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading || clockInPassword.trim().length < 3}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition cursor-pointer disabled:opacity-50"
+                >
+                  {actionLoading ? 'Verifying...' : 'Verify & Clock In'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

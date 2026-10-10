@@ -76,7 +76,8 @@ export const Employees = () => {
     phone: '',
     designation: '',
     departmentId: '',
-    password: ''
+    password: '',
+    currentPassword: ''
   });
 
   const fetchData = async () => {
@@ -138,20 +139,14 @@ export const Employees = () => {
   const canManage = ['ADMIN', 'HR'].includes(user?.role);
 
   const canEditEmployee = (emp) => {
-    if (canManage) return true;
-    return user?.id === emp.id || user?.email?.toLowerCase() === emp.email?.toLowerCase();
+    return true; // Accessible in shared workforce portal (requires passcode verification)
   };
 
   const canLogAttendance = (emp) => {
-    if (canManage) return true;
-    return user?.id === emp.id || user?.email?.toLowerCase() === emp.email?.toLowerCase();
+    return true; // Accessible in shared workforce portal (requires passcode verification)
   };
 
   const handleOpenEdit = (emp) => {
-    if (!canEditEmployee(emp)) {
-      showToast('Security Violation: You do not have permission to modify another employee’s profile.', 'error');
-      return;
-    }
     setEditingEmployee(emp);
     setEditData({
       firstName: emp.firstName,
@@ -160,7 +155,8 @@ export const Employees = () => {
       phone: emp.phone || '',
       designation: emp.designation,
       departmentId: emp.departmentId || '',
-      password: ''
+      password: '',
+      currentPassword: ''
     });
     setEditModalOpen(true);
   };
@@ -856,6 +852,27 @@ export const Employees = () => {
                   Enter 3–5 characters or digits to change employee passcode.
                 </p>
               </div>
+
+              {!canManage && (
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Employee Verification Passcode (3–5 Characters) *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={3}
+                    maxLength={5}
+                    value={editData.currentPassword || ''}
+                    onChange={(e) => setEditData({ ...editData, currentPassword: e.target.value })}
+                    placeholder="Enter this employee's 3–5 passcode"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    Anti-tamper protection: Passcode required to save modifications to this profile.
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button

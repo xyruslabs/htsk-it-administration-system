@@ -63,6 +63,13 @@ export const login = async (req, res) => {
     // Omit password
     const { password: _, ...userData } = employee;
 
+    if (userData.role === 'EMPLOYEE' || userData.email === 'employee@smarthr.io') {
+      userData.firstName = 'Workforce';
+      userData.lastName = 'Portal';
+      userData.designation = 'Universal Attendance Terminal';
+      userData.employeeCode = 'STAFF-PORTAL';
+    }
+
     await logAudit(employee.id, 'USER_LOGIN', 'AUTH', `User logged in from web portal`, req);
 
     return res.status(200).json({
@@ -80,6 +87,12 @@ export const login = async (req, res) => {
 export const getCurrentUser = async (req, res) => {
   try {
     const { password: _, ...userData } = req.user;
+    if (userData.role === 'EMPLOYEE' || userData.email === 'employee@smarthr.io') {
+      userData.firstName = 'Workforce';
+      userData.lastName = 'Portal';
+      userData.designation = 'Universal Attendance Terminal';
+      userData.employeeCode = 'STAFF-PORTAL';
+    }
     return res.status(200).json({
       success: true,
       user: userData

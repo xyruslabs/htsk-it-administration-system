@@ -43,6 +43,8 @@ export const Layout = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
+  const isEmployeePortal = user?.role === 'EMPLOYEE' || user?.email === 'employee@smarthr.io';
+
   const searchInputRef = useRef(null);
   const notifRef = useRef(null);
   const userMenuRef = useRef(null);
@@ -243,18 +245,24 @@ export const Layout = ({ children }) => {
           {/* Current User Quick Info Card */}
           <div className="mx-3.5 my-3.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex items-center space-x-3">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                {user?.firstName?.[0]}
-                {user?.lastName?.[0]}
-              </div>
+              {isEmployeePortal ? (
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+                  <Users size={18} />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  {user?.firstName?.[0]}
+                  {user?.lastName?.[0]}
+                </div>
+              )}
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0D1424]"></span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-900 dark:text-white truncate font-display tracking-tight">
-                {user?.firstName} {user?.lastName}
+                {isEmployeePortal ? 'Workforce Portal' : `${user?.firstName} ${user?.lastName}`}
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                {user?.designation || 'Specialist'}
+                {isEmployeePortal ? 'All Staff Attendance & Kiosk' : (user?.designation || 'Specialist')}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span
@@ -262,10 +270,10 @@ export const Layout = ({ children }) => {
                     user?.role
                   )}`}
                 >
-                  {user?.role}
+                  {isEmployeePortal ? 'ALL EMPLOYEES' : user?.role}
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                  {user?.employeeCode}
+                  {isEmployeePortal ? 'SHARED KIOSK' : user?.employeeCode}
                 </span>
               </div>
             </div>
@@ -544,16 +552,22 @@ export const Layout = ({ children }) => {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center space-x-2.5 p-1.5 pr-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 transition cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-                  {user?.firstName?.[0]}
-                  {user?.lastName?.[0]}
-                </div>
+                {isEmployeePortal ? (
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+                    <Users size={15} />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                    {user?.firstName?.[0]}
+                    {user?.lastName?.[0]}
+                  </div>
+                )}
                 <div className="text-left hidden lg:block">
                   <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                    {user?.firstName} {user?.lastName}
+                    {isEmployeePortal ? 'Workforce Portal' : `${user?.firstName} ${user?.lastName}`}
                   </p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                    {user?.role}
+                    {isEmployeePortal ? 'All Staff Access' : user?.role}
                   </p>
                 </div>
               </button>
@@ -562,17 +576,17 @@ export const Layout = ({ children }) => {
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden py-1">
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                     <p className="text-xs font-bold text-slate-900 dark:text-white">
-                      {user?.firstName} {user?.lastName}
+                      {isEmployeePortal ? 'Workforce Portal' : `${user?.firstName} ${user?.lastName}`}
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate font-mono">
-                      {user?.email}
+                      {isEmployeePortal ? 'Universal Staff Terminal' : user?.email}
                     </p>
                     <span
                       className={`inline-block mt-1 text-[9px] font-bold px-1.5 py-0.2 rounded border ${getRoleBadgeColor(
                         user?.role
                       )}`}
                     >
-                      {user?.role}
+                      {isEmployeePortal ? 'ALL EMPLOYEES' : user?.role}
                     </span>
                   </div>
                   <button
