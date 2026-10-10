@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { SmartHRLogo } from './SmartHRLogo';
+import api from '../api/axios';
 import {
   LayoutDashboard,
   Clock,
@@ -28,7 +29,13 @@ import {
   User,
   Shield,
   Layers,
-  Sparkles
+  Sparkles,
+  PlusCircle,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 
 export const Layout = ({ children }) => {
@@ -44,6 +51,95 @@ export const Layout = ({ children }) => {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const isEmployeePortal = user?.role === 'EMPLOYEE' || user?.email === 'employee@smarthr.io';
+
+  // Global Navbar Add Attendance Modal State
+  const [globalAttendanceModalOpen, setGlobalAttendanceModalOpen] = useState(false);
+  const [staffList, setStaffList] = useState([]);
+  const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [clockInTime, setClockInTime] = useState('09:00');
+  const [clockOutTime, setClockOutTime] = useState('17:30');
+  const [attendanceStatus, setAttendanceStatus] = useState('PRESENT');
+  const [attendanceNotes, setAttendanceNotes] = useState('');
+  const [attendancePasscode, setAttendancePasscode] = useState('');
+  const [showPasscode, setShowPasscode] = useState(false);
+  const [isHrOverride, setIsHrOverride] = useState(false);
+  const [attendanceSubmitting, setAttendanceSubmitting] = useState(false);
+  const [attendanceMessage, setAttendanceMessage] = useState({ text: '', type: '' });
+
+  const handleOpenAddAttendance = async () => {
+    setAttendanceMessage({ text: '', type: '' });
+    setAttendancePasscode('');
+    setShowPasscode(false);
+    setIsHrOverride(false);
+    setAttendanceDate(new Date().toISOString().split('T')[0]);
+    setClockInTime('09:00');
+    setClockOutTime('17:30');
+    setAttendanceStatus('PRESENT');
+    setAttendanceNotes('');
+    setGlobalAttendanceModalOpen(true);
+
+    try {
+      const res = await api.get('/employees?status=ACTIVE');
+      if (res.data.success && res.data.employees) {
+        setStaffList(res.data.employees);
+        if (!selectedStaffId && res.data.employees.length > 0) {
+          const savedId = sessionStorage.getItem('smarthr_selected_kiosk_emp');
+          setSelectedStaffId(savedId || res.data.employees[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load employees for attendance modal', err);
+    }
+  };
+
+  const handleGlobalAttendanceSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedStaffId) {
+      setAttendanceMessage({ text: 'Please select an employee.', type: 'error' });
+      return;
+    }
+
+    const canManage = ['ADMIN', 'HR'].includes(user?.role);
+    if (!canManage || !isHrOverride) {
+      const trimmed = attendancePasscode.trim();
+      if (!trimmed) {
+        setAttendanceMessage({ text: 'Please enter the employee’s 3–5 character passcode.', type: 'error' });
+        return;
+      }
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        setAttendanceMessage({ text: 'Passcode must be between 3 and 5 characters or digits.', type: 'error' });
+        return;
+      }
+    }
+
+    try {
+      setAttendanceSubmitting(true);
+      const res = await api.post('/attendance/manual', {
+        employeeId: selectedStaffId,
+        date: attendanceDate,
+        clockIn: clockInTime,
+        clockOut: clockOutTime,
+        status: attendanceStatus,
+        notes: attendanceNotes,
+        password: attendancePasscode.trim(),
+        isHrOverride: canManage && isHrOverride
+      });
+
+      setAttendanceMessage({ text: res.data.message || 'Attendance recorded successfully!', type: 'success' });
+      setTimeout(() => {
+        setGlobalAttendanceModalOpen(false);
+        window.dispatchEvent(new CustomEvent('smarthr_attendance_updated'));
+      }, 1200);
+    } catch (err) {
+      setAttendanceMessage({
+        text: err.response?.data?.message || 'Failed to record attendance. Please check passcode.',
+        type: 'error'
+      });
+    } finally {
+      setAttendanceSubmitting(false);
+    }
+  };
 
   const searchInputRef = useRef(null);
   const notifRef = useRef(null);
@@ -104,10 +200,11 @@ export const Layout = ({ children }) => {
       group: 'Workforce & Time',
       items: [
         {
-          label: 'My Time & Breaks',
+          label: 'Add / Mark Attendance',
           path: '/attendance',
           icon: Clock,
-          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE']
+          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'],
+          badge: 'Quick'
         },
         {
           label: 'Leave Management',
@@ -475,6 +572,17 @@ export const Layout = ({ children }) => {
 
           {/* Right: Actions, Notifications, Theme, User Pill */}
           <div className="flex items-center space-x-3">
+            {/* Quick Add Attendance Navbar Button */}
+            <button
+              type="button"
+              onClick={handleOpenAddAttendance}
+              title="Add Attendance Record"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
+            >
+              <PlusCircle size={15} />
+              <span className="hidden sm:inline">Add Attendance</span>
+            </button>
+
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
@@ -636,6 +744,200 @@ export const Layout = ({ children }) => {
         {/* Dynamic Route Body */}
         <div className="p-4 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">{children}</div>
       </main>
+
+      {/* Global Navbar Add Attendance Modal */}
+      {globalAttendanceModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl space-y-4 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <PlusCircle size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                    Add Attendance Record
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Log employee shift attendance & verification
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGlobalAttendanceModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            {/* Notification Alert */}
+            {attendanceMessage.text && (
+              <div
+                className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
+                  attendanceMessage.type === 'error'
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                }`}
+              >
+                {attendanceMessage.type === 'error' ? <AlertCircle size={15} /> : <CheckCircle size={15} />}
+                <span>{attendanceMessage.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGlobalAttendanceSubmit} className="space-y-4">
+              {/* Employee Selection */}
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Select Employee
+                </label>
+                <select
+                  required
+                  value={selectedStaffId}
+                  onChange={(e) => setSelectedStaffId(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="">Choose an employee...</option>
+                  {staffList.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.firstName} {emp.lastName} — {emp.employeeCode} ({emp.department?.name || emp.designation})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Passcode Verification */}
+              {(!['ADMIN', 'HR'].includes(user?.role) || !isHrOverride) && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Employee Passcode (3–5 Characters)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasscode ? 'text' : 'password'}
+                      required
+                      minLength={3}
+                      maxLength={5}
+                      value={attendancePasscode}
+                      onChange={(e) => setAttendancePasscode(e.target.value)}
+                      placeholder="3–5 characters or digits (e.g. 1234)"
+                      className="w-full pl-3 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasscode(!showPasscode)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      {showPasscode ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    Confidential anti-proxy security verification.
+                  </p>
+                </div>
+              )}
+
+              {/* HR Override Checkbox for Admins */}
+              {['ADMIN', 'HR'].includes(user?.role) && (
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+                  <input
+                    type="checkbox"
+                    id="globalHrOverride"
+                    checked={isHrOverride}
+                    onChange={(e) => setIsHrOverride(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <label htmlFor="globalHrOverride" className="text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+                    HR Admin Override (Bypass employee passcode)
+                  </label>
+                </div>
+              )}
+
+              {/* Date & Status */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={attendanceDate}
+                    onChange={(e) => setAttendanceDate(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
+                  <select
+                    value={attendanceStatus}
+                    onChange={(e) => setAttendanceStatus(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="PRESENT">Present</option>
+                    <option value="LATE">Late Arrival</option>
+                    <option value="HALF_DAY">Half Day</option>
+                    <option value="ON_LEAVE">Approved Leave</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Clock In / Out times */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Clock In</label>
+                  <input
+                    type="time"
+                    required
+                    value={clockInTime}
+                    onChange={(e) => setClockInTime(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Clock Out</label>
+                  <input
+                    type="time"
+                    value={clockOutTime}
+                    onChange={(e) => setClockOutTime(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Notes (Optional)</label>
+                <input
+                  type="text"
+                  value={attendanceNotes}
+                  onChange={(e) => setAttendanceNotes(e.target.value)}
+                  placeholder="e.g. Field assignment, approved manual shift"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setGlobalAttendanceModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={attendanceSubmitting}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition cursor-pointer disabled:opacity-50"
+                >
+                  {attendanceSubmitting ? 'Recording...' : 'Submit Attendance'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
