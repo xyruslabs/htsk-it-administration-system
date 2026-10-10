@@ -6,10 +6,6 @@ export const getLeaveBalances = async (req, res) => {
     const employeeId = req.query.employeeId || req.user.id;
     const year = parseInt(req.query.year) || new Date().getFullYear();
 
-    if (req.user.role === 'EMPLOYEE' && employeeId !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Unauthorized access to leave balances' });
-    }
-
     const balances = await prisma.leaveBalance.findMany({
       where: { employeeId, year }
     });
@@ -27,8 +23,9 @@ export const getLeaveRequests = async (req, res) => {
 
     if (status) where.status = status;
 
-    // Normal employee only sees their own
-    if (req.user.role === 'EMPLOYEE') {
+    if (employeeId) {
+      where.employeeId = employeeId;
+    } else if (req.user.role === 'EMPLOYEE') {
       where.employeeId = req.user.id;
     } else if (req.user.role === 'MANAGER') {
       // Manager sees their subordinates' leaves or their own
@@ -36,9 +33,6 @@ export const getLeaveRequests = async (req, res) => {
         { employeeId: req.user.id },
         { employee: { managerId: req.user.id } }
       ];
-    } else if (employeeId) {
-      // Admin / HR can filter by any employee
-      where.employeeId = employeeId;
     }
 
     const requests = await prisma.leaveRequest.findMany({
@@ -69,7 +63,7 @@ export const getLeaveRequests = async (req, res) => {
 
 export const submitLeaveRequest = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.body?.employeeId || req.user.id;
     const { leaveType, startDate, endDate, daysCount, reason } = req.body;
 
     if (!leaveType || !startDate || !endDate || !daysCount || !reason) {

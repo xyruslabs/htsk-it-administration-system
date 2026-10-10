@@ -6,7 +6,7 @@ const getTodayStr = () => new Date().toISOString().split('T')[0];
 
 export const getTodayAttendanceStatus = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.query.employeeId || req.user.id;
     const today = getTodayStr();
 
     const attendance = await prisma.attendance.findUnique({
@@ -37,7 +37,7 @@ export const getTodayAttendanceStatus = async (req, res) => {
 
 export const clockIn = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.body.employeeId || req.user.id;
     const today = getTodayStr();
 
     // Check if single daily clock-in already exists
@@ -84,7 +84,7 @@ export const clockIn = async (req, res) => {
 
 export const clockOut = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.body?.employeeId || req.user.id;
     const today = getTodayStr();
 
     const attendance = await prisma.attendance.findUnique({
@@ -141,7 +141,7 @@ export const clockOut = async (req, res) => {
 
 export const startBreak = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.body?.employeeId || req.user.id;
     const today = getTodayStr();
     const { type } = req.body; // LUNCH, TEA, EMERGENCY
 
@@ -193,7 +193,7 @@ export const startBreak = async (req, res) => {
 
 export const endBreak = async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const employeeId = req.body?.employeeId || req.user.id;
     const today = getTodayStr();
 
     const attendance = await prisma.attendance.findUnique({
@@ -250,11 +250,11 @@ export const getAttendanceHistory = async (req, res) => {
 
     const where = {};
 
-    // Standard employee can only see their own attendance history
-    if (req.user.role === 'EMPLOYEE') {
-      where.employeeId = req.user.id;
-    } else if (employeeId) {
+    // If employeeId specified (e.g. from employee selector), filter by it; otherwise fallback to logged in user for employee role
+    if (employeeId) {
       where.employeeId = employeeId;
+    } else if (req.user.role === 'EMPLOYEE') {
+      where.employeeId = req.user.id;
     }
 
     if (departmentId) {

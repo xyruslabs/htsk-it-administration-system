@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -11,11 +11,21 @@ import {
   Calendar,
   History,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  Users,
+  Search,
+  UserCheck,
+  ArrowRightLeft,
+  X
 } from 'lucide-react';
 
 export const Attendance = () => {
   const { user } = useAuth();
+  const [employeesList, setEmployeesList] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
   const [statusData, setStatusData] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,16 +34,49 @@ export const Attendance = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [message, setMessage] = useState({ text: '', type: '' });
 
+  const selectorRef = useRef(null);
+
   // Update real-time clock every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const fetchTodayStatus = async () => {
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (selectorRef.current && !selectorRef.current.contains(e.target)) {
+        setIsSelectorOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch all active employees for kiosk identity selection
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const res = await api.get('/employees?status=ACTIVE');
+        if (res.data.success && res.data.employees?.length > 0) {
+          const list = res.data.employees;
+          setEmployeesList(list);
+          // Default to logged-in user if found in list, else first active employee
+          const found = list.find((e) => e.id === user?.id || e.email === user?.email);
+          setSelectedEmployee(found || list[0]);
+        }
+      } catch (err) {
+        console.error('Failed to load employee list', err);
+      }
+    };
+    loadEmployees();
+  }, [user]);
+
+  const fetchTodayStatus = async (empId = selectedEmployee?.id) => {
+    if (!empId) return;
     try {
       setLoading(true);
-      const res = await api.get('/attendance/today');
+      const res = await api.get(`/attendance/today?employeeId=${empId}`);
       if (res.data.success) {
         setStatusData(res.data);
       }
@@ -44,9 +87,10 @@ export const Attendance = () => {
     }
   };
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (empId = selectedEmployee?.id) => {
+    if (!empId) return;
     try {
-      const res = await api.get('/attendance/history');
+      const res = await api.get(`/attendance/history?employeeId=${empId}`);
       if (res.data.success) {
         setHistory(res.data.attendances);
       }
@@ -55,10 +99,13 @@ export const Attendance = () => {
     }
   };
 
+  // When selected employee changes, reload their records
   useEffect(() => {
-    fetchTodayStatus();
-    fetchHistory();
-  }, []);
+    if (selectedEmployee?.id) {
+      fetchTodayStatus(selectedEmployee.id);
+      fetchHistory(selectedEmployee.id);
+    }
+  }, [selectedEmployee?.id]);
 
   const showToast = (text, type = 'success') => {
     setMessage({ text, type });
@@ -66,12 +113,13 @@ export const Attendance = () => {
   };
 
   const handleClockIn = async () => {
+    if (!selectedEmployee?.id) return;
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/clock-in');
-      showToast(res.data.message, 'success');
-      fetchTodayStatus();
-      fetchHistory();
+      const res = await api.post('/attendance/clock-in', { employeeId: selectedEmployee.id });
+      showToast(`${res.data.message} (${selectedEmployee.firstName} ${selectedEmployee.lastName})`, 'success');
+      fetchTodayStatus(selectedEmployee.id);
+      fetchHistory(selectedEmployee.id);
     } catch (err) {
       showToast(err.response?.data?.message || 'Clock-in failed', 'error');
     } finally {
@@ -80,12 +128,13 @@ export const Attendance = () => {
   };
 
   const handleClockOut = async () => {
+    if (!selectedEmployee?.id) return;
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/clock-out');
-      showToast(res.data.message, 'success');
-      fetchTodayStatus();
-      fetchHistory();
+      const res = await api.post('/attendance/clock-out', { employeeId: selectedEmployee.id });
+      showToast(`${res.data.message} (${selectedEmployee.firstName} ${selectedEmployee.lastName})`, 'success');
+      fetchTodayStatus(selectedEmployee.id);
+      fetchHistory(selectedEmployee.id);
     } catch (err) {
       showToast(err.response?.data?.message || 'Clock-out failed', 'error');
     } finally {
@@ -94,11 +143,12 @@ export const Attendance = () => {
   };
 
   const handleStartBreak = async () => {
+    if (!selectedEmployee?.id) return;
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/break/start', { type: breakType });
-      showToast(res.data.message, 'success');
-      fetchTodayStatus();
+      const res = await api.post('/attendance/break/start', { type: breakType, employeeId: selectedEmployee.id });
+      showToast(`${res.data.message} (${selectedEmployee.firstName} ${selectedEmployee.lastName})`, 'success');
+      fetchTodayStatus(selectedEmployee.id);
     } catch (err) {
       showToast(err.response?.data?.message || 'Break start failed', 'error');
     } finally {
@@ -107,17 +157,30 @@ export const Attendance = () => {
   };
 
   const handleEndBreak = async () => {
+    if (!selectedEmployee?.id) return;
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/break/end');
-      showToast(res.data.message, 'success');
-      fetchTodayStatus();
+      const res = await api.post('/attendance/break/end', { employeeId: selectedEmployee.id });
+      showToast(`${res.data.message} (${selectedEmployee.firstName} ${selectedEmployee.lastName})`, 'success');
+      fetchTodayStatus(selectedEmployee.id);
     } catch (err) {
       showToast(err.response?.data?.message || 'Resume work failed', 'error');
     } finally {
       setActionLoading(false);
     }
   };
+
+  const filteredEmployees = employeesList.filter((emp) => {
+    const q = employeeSearch.toLowerCase().trim();
+    if (!q) return true;
+    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    return (
+      fullName.includes(q) ||
+      emp.employeeCode.toLowerCase().includes(q) ||
+      emp.email.toLowerCase().includes(q) ||
+      emp.designation.toLowerCase().includes(q)
+    );
+  });
 
   const hasClockedIn = statusData?.hasClockedIn;
   const hasClockedOut = statusData?.hasClockedOut;
@@ -138,6 +201,138 @@ export const Attendance = () => {
           <span>{message.text}</span>
         </div>
       )}
+
+      {/* Universal Employee Kiosk Identity Selector */}
+      <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs transition-colors relative" ref={selectorRef}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-[#D2FD41]/10 to-transparent text-emerald-600 dark:text-[#D2FD41] border border-emerald-500/30 flex items-center justify-center font-black text-base shadow-sm">
+              {selectedEmployee ? `${selectedEmployee.firstName[0]}${selectedEmployee.lastName[0]}` : 'EM'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 font-display">
+                  Active Employee Profile
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                  {selectedEmployee?.employeeCode || 'SHR-000'}
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white font-display tracking-tight flex items-center gap-2 mt-0.5">
+                <span>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'Select Employee'}</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                {selectedEmployee?.designation || 'Specialist'} • <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedEmployee?.department?.name || 'SmartHR Operations'}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Searchable Name Filter Input & Dropdown */}
+          <div className="relative w-full lg:w-96">
+            <div className="relative flex items-center">
+              <Search size={15} className="absolute left-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={employeeSearch}
+                onChange={(e) => {
+                  setEmployeeSearch(e.target.value);
+                  setIsSelectorOpen(true);
+                }}
+                onFocus={() => setIsSelectorOpen(true)}
+                placeholder="Filter by name (e.g. Elena, Liam, Priya)..."
+                className="w-full pl-10 pr-9 py-2 text-xs bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+              />
+              {employeeSearch && (
+                <button
+                  onClick={() => {
+                    setEmployeeSearch('');
+                    setIsSelectorOpen(false);
+                  }}
+                  className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Dropdown Menu */}
+            {isSelectorOpen && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-72 overflow-y-auto">
+                <div className="px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span>Select Employee to Mark Attendance</span>
+                  <span>{filteredEmployees.length} matching</span>
+                </div>
+                {filteredEmployees.length > 0 ? (
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {filteredEmployees.map((emp) => {
+                      const isCurrent = emp.id === selectedEmployee?.id;
+                      return (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedEmployee(emp);
+                            setIsSelectorOpen(false);
+                            setEmployeeSearch('');
+                          }}
+                          className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer text-xs ${
+                            isCurrent ? 'bg-emerald-50/40 dark:bg-emerald-500/10' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-600/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 font-bold text-xs flex items-center justify-center">
+                              {emp.firstName[0]}{emp.lastName[0]}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white text-xs leading-tight">
+                                {emp.firstName} {emp.lastName}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                                {emp.designation} • <span className="font-mono">{emp.employeeCode}</span>
+                              </p>
+                            </div>
+                          </div>
+                          {isCurrent && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                              Selected
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="px-4 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                    No employees matching "{employeeSearch}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Identity Switcher Pills */}
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1">
+          <span className="text-[11px] font-bold text-slate-400 whitespace-nowrap flex items-center gap-1">
+            <ArrowRightLeft size={12} />
+            Quick Switch:
+          </span>
+          {employeesList.slice(0, 6).map((emp) => (
+            <button
+              key={emp.id}
+              onClick={() => setSelectedEmployee(emp)}
+              className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                selectedEmployee?.id === emp.id
+                  ? 'bg-slate-900 text-white dark:bg-[#D2FD41] dark:text-[#0A0E1A] font-bold shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>{emp.firstName} {emp.lastName}</span>
+              <span className="text-[10px] opacity-75 font-mono">({emp.employeeCode})</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Main Terminal Card */}
       <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden transition-colors">

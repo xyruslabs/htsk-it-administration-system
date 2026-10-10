@@ -10,11 +10,20 @@ import {
   FileText,
   AlertCircle,
   Filter,
-  UserCheck
+  UserCheck,
+  Search,
+  Users,
+  ArrowRightLeft,
+  X
 } from 'lucide-react';
 
 export const LeaveManagement = () => {
   const { user } = useAuth();
+  const [employeesList, setEmployeesList] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
   const [balances, setBalances] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,12 +38,31 @@ export const LeaveManagement = () => {
   const [daysCount, setDaysCount] = useState(1);
   const [reason, setReason] = useState('');
 
-  const fetchData = async () => {
+  // Fetch employees for identity switching
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const res = await api.get('/employees?status=ACTIVE');
+        if (res.data.success && res.data.employees?.length > 0) {
+          const list = res.data.employees;
+          setEmployeesList(list);
+          const found = list.find((e) => e.id === user?.id || e.email === user?.email);
+          setSelectedEmployee(found || list[0]);
+        }
+      } catch (err) {
+        console.error('Failed to load employee list', err);
+      }
+    };
+    loadEmployees();
+  }, [user]);
+
+  const fetchData = async (empId = selectedEmployee?.id) => {
     try {
       setLoading(true);
+      const query = empId ? `?employeeId=${empId}` : '';
       const [balRes, reqRes] = await Promise.all([
-        api.get('/leaves/balances'),
-        api.get('/leaves/requests')
+        api.get(`/leaves/balances${query}`),
+        api.get(`/leaves/requests${query}`)
       ]);
 
       if (balRes.data.success) setBalances(balRes.data.balances);
@@ -47,8 +75,10 @@ export const LeaveManagement = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (selectedEmployee?.id) {
+      fetchData(selectedEmployee.id);
+    }
+  }, [selectedEmployee?.id]);
 
   const showToast = (text, type = 'success') => {
     setMessage({ text, type });
@@ -59,17 +89,18 @@ export const LeaveManagement = () => {
     e.preventDefault();
     try {
       const res = await api.post('/leaves/apply', {
+        employeeId: selectedEmployee?.id,
         leaveType,
         startDate,
         endDate,
         daysCount,
         reason
       });
-      showToast(res.data.message, 'success');
+      showToast(`${res.data.message} (${selectedEmployee?.firstName} ${selectedEmployee?.lastName})`, 'success');
       setModalOpen(false);
       // Reset form
       setReason('');
-      fetchData();
+      fetchData(selectedEmployee?.id);
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to submit leave application', 'error');
     }
@@ -107,6 +138,134 @@ export const LeaveManagement = () => {
           <span>{message.text}</span>
         </div>
       )}
+
+      {/* Universal Employee Kiosk Identity Selector */}
+      <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs transition-colors relative">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 via-emerald-500/10 to-transparent text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center justify-center font-black text-base shadow-sm">
+              {selectedEmployee ? `${selectedEmployee.firstName[0]}${selectedEmployee.lastName[0]}` : 'EM'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 font-display">
+                  Active Leave Applicant
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                  {selectedEmployee?.employeeCode || 'SHR-000'}
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white font-display tracking-tight flex items-center gap-2 mt-0.5">
+                <span>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'Select Employee'}</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                {selectedEmployee?.designation || 'Staff'} • <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedEmployee?.department?.name || 'SmartHR Operations'}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Searchable Name Filter Input & Dropdown */}
+          <div className="relative w-full lg:w-80">
+            <div className="relative flex items-center">
+              <Search size={15} className="absolute left-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={employeeSearch}
+                onChange={(e) => {
+                  setEmployeeSearch(e.target.value);
+                  setIsSelectorOpen(true);
+                }}
+                onFocus={() => setIsSelectorOpen(true)}
+                placeholder="Filter by name (e.g. Elena, Liam)..."
+                className="w-full pl-10 pr-9 py-2 text-xs bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+              />
+              {employeeSearch && (
+                <button
+                  onClick={() => {
+                    setEmployeeSearch('');
+                    setIsSelectorOpen(false);
+                  }}
+                  className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Dropdown Menu */}
+            {isSelectorOpen && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-64 overflow-y-auto">
+                <div className="px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span>Select Employee Profile</span>
+                  <span>{employeesList.filter(e => `${e.firstName} ${e.lastName}`.toLowerCase().includes(employeeSearch.toLowerCase())).length} matching</span>
+                </div>
+                <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {employeesList
+                    .filter((e) => `${e.firstName} ${e.lastName} ${e.employeeCode}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                    .map((emp) => {
+                      const isCurrent = emp.id === selectedEmployee?.id;
+                      return (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedEmployee(emp);
+                            setIsSelectorOpen(false);
+                            setEmployeeSearch('');
+                          }}
+                          className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer text-xs ${
+                            isCurrent ? 'bg-blue-50/40 dark:bg-blue-500/10' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-blue-600/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 font-bold text-xs flex items-center justify-center">
+                              {emp.firstName[0]}{emp.lastName[0]}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white text-xs leading-tight">
+                                {emp.firstName} {emp.lastName}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                                {emp.designation} • <span className="font-mono">{emp.employeeCode}</span>
+                              </p>
+                            </div>
+                          </div>
+                          {isCurrent && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                              Selected
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Identity Switcher Pills */}
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1">
+          <span className="text-[11px] font-bold text-slate-400 whitespace-nowrap flex items-center gap-1">
+            <ArrowRightLeft size={12} />
+            Quick Switch:
+          </span>
+          {employeesList.slice(0, 6).map((emp) => (
+            <button
+              key={emp.id}
+              onClick={() => setSelectedEmployee(emp)}
+              className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                selectedEmployee?.id === emp.id
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>{emp.firstName} {emp.lastName}</span>
+              <span className="text-[10px] opacity-75 font-mono">({emp.employeeCode})</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

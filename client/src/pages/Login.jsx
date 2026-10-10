@@ -261,7 +261,10 @@ export const Login = () => {
               onClick={() => handleDemoSelect('employee@smarthr.io')}
               className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-left transition-colors cursor-pointer"
             >
-              <div className="font-semibold text-blue-600 dark:text-blue-400">Employee</div>
+              <div className="font-semibold text-blue-600 dark:text-blue-400 flex items-center justify-between">
+                <span>Employee Portal</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/30 font-bold">All Staff</span>
+              </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate font-mono">employee@smarthr.io</div>
             </button>
           </div>

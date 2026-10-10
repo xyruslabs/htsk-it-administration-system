@@ -118,7 +118,7 @@ export const Layout = ({ children }) => {
           label: 'Employee Directory',
           path: '/employees',
           icon: Users,
-          roles: ['ADMIN', 'HR', 'MANAGER']
+          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE']
         }
       ]
     },

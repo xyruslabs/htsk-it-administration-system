@@ -121,6 +121,9 @@ export const createEmployee = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password || 'password123', 10);
 
+    const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
+    const initialStatus = isHRorAdmin ? (req.body.status || 'ACTIVE') : 'PENDING_APPROVAL';
+
     const newEmployee = await prisma.employee.create({
       data: {
         employeeCode,
@@ -128,7 +131,8 @@ export const createEmployee = async (req, res) => {
         lastName,
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        role,
+        role: isHRorAdmin ? (role || 'EMPLOYEE') : 'EMPLOYEE',
+        status: initialStatus,
         designation,
         departmentId: departmentId || null,
         managerId: managerId || null,
@@ -141,24 +145,29 @@ export const createEmployee = async (req, res) => {
       }
     });
 
-    // Create default leave balances
-    const leaveTypes = ['ANNUAL', 'MEDICAL', 'CASUAL', 'UNPAID'];
-    for (const lt of leaveTypes) {
-      await prisma.leaveBalance.create({
-        data: {
-          employeeId: newEmployee.id,
-          leaveType: lt,
-          allocated: lt === 'ANNUAL' ? 14 : lt === 'MEDICAL' ? 10 : lt === 'CASUAL' ? 7 : 30,
-          used: 0,
-          year: new Date().getFullYear()
-        }
-      });
+    // Create default leave balances if activated immediately
+    if (initialStatus === 'ACTIVE') {
+      const leaveTypes = ['ANNUAL', 'MEDICAL', 'CASUAL', 'UNPAID'];
+      for (const lt of leaveTypes) {
+        await prisma.leaveBalance.create({
+          data: {
+            employeeId: newEmployee.id,
+            leaveType: lt,
+            allocated: lt === 'ANNUAL' ? 14 : lt === 'MEDICAL' ? 10 : lt === 'CASUAL' ? 7 : 30,
+            used: 0,
+            year: new Date().getFullYear()
+          }
+        });
+      }
     }
 
-    await logAudit(req.user.id, 'CREATE_EMPLOYEE', 'EMPLOYEE', `Created employee ${newEmployee.employeeCode} (${newEmployee.email})`, req);
+    await logAudit(req.user.id, 'CREATE_EMPLOYEE', 'EMPLOYEE', `Created employee ${newEmployee.employeeCode} (${newEmployee.email}) [Status: ${initialStatus}]`, req);
 
     const { password: _, ...createdData } = newEmployee;
-    return res.status(201).json({ success: true, message: 'Employee registered successfully', employee: createdData });
+    const message = initialStatus === 'ACTIVE'
+      ? 'Employee registered and activated successfully'
+      : 'Employee registration submitted! Pending HR approval before activation.';
+    return res.status(201).json({ success: true, message, employee: createdData });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -214,6 +223,75 @@ export const updateEmployee = async (req, res) => {
 
     const { password: _, ...cleaned } = updated;
     return res.status(200).json({ success: true, message: 'Employee updated successfully', employee: cleaned });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const approveEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const employee = await prisma.employee.findUnique({ where: { id } });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    const updated = await prisma.employee.update({
+      where: { id },
+      data: { status: 'ACTIVE' },
+      include: { department: true }
+    });
+
+    // Ensure default leave balances exist upon approval
+    const existingBalances = await prisma.leaveBalance.findMany({ where: { employeeId: id } });
+    if (existingBalances.length === 0) {
+      const leaveTypes = ['ANNUAL', 'MEDICAL', 'CASUAL', 'UNPAID'];
+      for (const lt of leaveTypes) {
+        await prisma.leaveBalance.create({
+          data: {
+            employeeId: id,
+            leaveType: lt,
+            allocated: lt === 'ANNUAL' ? 14 : lt === 'MEDICAL' ? 10 : lt === 'CASUAL' ? 7 : 30,
+            used: 0,
+            year: new Date().getFullYear()
+          }
+        });
+      }
+    }
+
+    await logAudit(req.user.id, 'APPROVE_EMPLOYEE', 'EMPLOYEE', `Approved employee registration for ${updated.employeeCode} (${updated.firstName} ${updated.lastName})`, req);
+
+    return res.status(200).json({
+      success: true,
+      message: `Employee ${updated.firstName} ${updated.lastName} has been approved and activated!`,
+      employee: updated
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const rejectEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const employee = await prisma.employee.findUnique({ where: { id } });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    const updated = await prisma.employee.update({
+      where: { id },
+      data: { status: 'REJECTED' },
+      include: { department: true }
+    });
+
+    await logAudit(req.user.id, 'REJECT_EMPLOYEE', 'EMPLOYEE', `Rejected employee registration for ${updated.employeeCode} (${updated.firstName} ${updated.lastName})`, req);
+
+    return res.status(200).json({
+      success: true,
+      message: `Registration for ${updated.firstName} ${updated.lastName} has been rejected.`,
+      employee: updated
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
