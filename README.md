@@ -75,11 +75,11 @@ npm run dev      # Starts Vite client on http://localhost:5173
 - Passcode required when clocking in at the kiosk, logging manual attendance, and updating employee profiles.
 - Seamless fallback auto-upgrade for legacy accounts.
 
-### 3. Live Floor Attendance Monitor & Quick "Add Attendance"
-- Accessible directly via the **"Add Attendance"** button in the top navbar and sidebar navigation.
+### 3. Live Floor Attendance Monitor & Shift Tracking
+- Accessible directly via **"Live Floor Monitor"** and **"Add / Mark Attendance"** in sidebar navigation.
 - Real-time KPI counters: *Active On Duty*, *On Break*, *On Leave*, *Absent/Late*.
 - Full workforce roster with status filter tabs (`ALL`, `ON DUTY`, `ON BREAK`, `ON LEAVE`, `ABSENT`).
-- One-click **"Add Attendance"** button on each employee row for rapid shift logging.
+- One-click **"Add Attendance"** action button on each employee roster row for rapid shift logging.
 
 ### 4. Employee Directory & HR Approval Workflow
 - Public staff directory with searchable name, department, email, and employee code filters.
