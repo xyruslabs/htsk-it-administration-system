@@ -156,9 +156,15 @@ export const FloorMonitor = () => {
       return;
     }
 
-    if ((!isHRorAdmin || !isHrOverride) && (!formData.password || formData.password.trim() === '')) {
-      setModalError('Security Verification Required: Please enter the employee’s password.');
-      return;
+    if ((!isHRorAdmin || !isHrOverride)) {
+      if (!formData.password || formData.password.trim() === '') {
+        setModalError('Please enter the employee’s 3–5 character passcode.');
+        return;
+      }
+      if (formData.password.trim().length < 3 || formData.password.trim().length > 5) {
+        setModalError('Passcode must be between 3 and 5 characters or digits.');
+        return;
+      }
     }
 
     try {
@@ -487,13 +493,13 @@ export const FloorMonitor = () => {
                 </div>
               )}
 
-              {/* Password Verification Field */}
+              {/* Passcode Verification Field */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <Lock size={12} className="text-slate-400" />
-                    <span>Employee Password</span>
-                    <span className="text-slate-400 font-normal">(Verification)</span>
+                    <span>Employee Passcode</span>
+                    <span className="text-slate-400 font-normal">(3–5 characters)</span>
                   </label>
                   {isHRorAdmin && (
                     <label className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">
@@ -513,9 +519,11 @@ export const FloorMonitor = () => {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required={!isHrOverride}
+                      minLength={3}
+                      maxLength={5}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="Enter employee password to authorize entry..."
+                      placeholder="3–5 characters or digits (e.g. 1234)"
                       className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 pr-9 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
                     />
                     <button
@@ -529,7 +537,7 @@ export const FloorMonitor = () => {
                   </div>
                 )}
                 <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Required to authenticate this attendance record.
+                  Enter 3–5 digits or characters to confirm identity.
                 </p>
               </div>
 

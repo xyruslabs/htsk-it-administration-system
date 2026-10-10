@@ -61,7 +61,7 @@ export const Employees = () => {
     firstName: '',
     lastName: '',
     email: '',
-    password: 'password123',
+    password: '1234',
     role: 'EMPLOYEE',
     designation: '',
     departmentId: '',
@@ -75,7 +75,8 @@ export const Employees = () => {
     email: '',
     phone: '',
     designation: '',
-    departmentId: ''
+    departmentId: '',
+    password: ''
   });
 
   const fetchData = async () => {
@@ -106,6 +107,10 @@ export const Employees = () => {
 
   const handleCreateEmployee = async (e) => {
     e.preventDefault();
+    if (formData.password && (formData.password.trim().length < 3 || formData.password.trim().length > 5)) {
+      showToast('Passcode must be between 3 and 5 characters or digits.', 'error');
+      return;
+    }
     try {
       setActionLoading(true);
       const res = await api.post('/employees', formData);
@@ -116,7 +121,7 @@ export const Employees = () => {
         firstName: '',
         lastName: '',
         email: '',
-        password: 'password123',
+        password: '1234',
         role: 'EMPLOYEE',
         designation: '',
         departmentId: '',
@@ -154,7 +159,8 @@ export const Employees = () => {
       email: emp.email,
       phone: emp.phone || '',
       designation: emp.designation,
-      departmentId: emp.departmentId || ''
+      departmentId: emp.departmentId || '',
+      password: ''
     });
     setEditModalOpen(true);
   };
@@ -182,9 +188,15 @@ export const Employees = () => {
     e.preventDefault();
     if (!selectedAttendanceEmp) return;
 
-    if ((!canManage || !isAttendanceHrOverride) && (!attendanceData.password || attendanceData.password.trim() === '')) {
-      showToast('Security Verification Required: Please enter the employee’s password.', 'error');
-      return;
+    if ((!canManage || !isAttendanceHrOverride)) {
+      if (!attendanceData.password || attendanceData.password.trim() === '') {
+        showToast('Please enter the employee’s 3–5 character passcode.', 'error');
+        return;
+      }
+      if (attendanceData.password.trim().length < 3 || attendanceData.password.trim().length > 5) {
+        showToast('Passcode must be between 3 and 5 characters or digits.', 'error');
+        return;
+      }
     }
 
     try {
@@ -212,6 +224,13 @@ export const Employees = () => {
   const handleUpdateEmployee = async (e) => {
     e.preventDefault();
     if (!editingEmployee) return;
+    if (editData.password && editData.password.trim() !== '') {
+      const trimmed = editData.password.trim();
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        showToast('Passcode must be between 3 and 5 characters or digits.', 'error');
+        return;
+      }
+    }
     try {
       setActionLoading(true);
       const res = await api.put(`/employees/${editingEmployee.id}`, editData);
@@ -695,6 +714,25 @@ export const Employees = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Passcode (3–5 Characters)
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={3}
+                  maxLength={5}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="3–5 characters or digits (e.g. 1234)"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Employee's security passcode for login and attendance verification.
+                </p>
+              </div>
+
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
@@ -801,6 +839,24 @@ export const Employees = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  New Passcode (3–5 Characters, Optional)
+                </label>
+                <input
+                  type="password"
+                  minLength={3}
+                  maxLength={5}
+                  value={editData.password || ''}
+                  onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+                  placeholder="Leave blank to keep current passcode"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Enter 3–5 characters or digits to change employee passcode.
+                </p>
+              </div>
+
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
@@ -867,13 +923,13 @@ export const Employees = () => {
                 </span>
               </div>
 
-              {/* Password Verification Field */}
+              {/* Passcode Verification Field */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <Lock size={12} className="text-slate-400" />
-                    <span>Employee Password</span>
-                    <span className="text-slate-400 font-normal">(Verification)</span>
+                    <span>Employee Passcode</span>
+                    <span className="text-slate-400 font-normal">(3–5 characters)</span>
                   </label>
                   {canManage && (
                     <label className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">
@@ -893,9 +949,11 @@ export const Employees = () => {
                     <input
                       type={showAttendancePassword ? 'text' : 'password'}
                       required={!isAttendanceHrOverride}
+                      minLength={3}
+                      maxLength={5}
                       value={attendanceData.password}
                       onChange={(e) => setAttendanceData({ ...attendanceData, password: e.target.value })}
-                      placeholder="Enter employee password to authorize entry..."
+                      placeholder="3–5 characters or digits (e.g. 1234)"
                       className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 pr-9 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
                     />
                     <button
@@ -909,7 +967,7 @@ export const Employees = () => {
                   </div>
                 )}
                 <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Required to authenticate this attendance record.
+                  Enter 3–5 digits or characters to confirm identity.
                 </p>
               </div>
 

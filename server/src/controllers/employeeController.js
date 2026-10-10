@@ -119,7 +119,14 @@ export const createEmployee = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Employee with this email or code already exists.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password || 'password123', 10);
+    const passcode = (password && password.trim() !== '') ? password.trim() : '1234';
+    if (passcode.length < 3 || passcode.length > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passcode must be between 3 and 5 characters or digits.'
+      });
+    }
+    const hashedPassword = await bcrypt.hash(passcode, 10);
 
     const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
     const initialStatus = isHRorAdmin ? (req.body.status || 'ACTIVE') : 'PENDING_APPROVAL';
@@ -224,7 +231,14 @@ export const updateEmployee = async (req, res) => {
     }
 
     if (password && password.trim() !== '') {
-      data.password = await bcrypt.hash(password, 10);
+      const trimmed = password.trim();
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        return res.status(400).json({
+          success: false,
+          message: 'Passcode must be between 3 and 5 characters or digits.'
+        });
+      }
+      data.password = await bcrypt.hash(trimmed, 10);
     }
 
     const updated = await prisma.employee.update({

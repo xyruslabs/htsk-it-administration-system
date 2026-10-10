@@ -47,13 +47,30 @@ export const clockIn = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }
 
-    // If password is provided, verify against employee's confidential password
+    // If passcode is provided, verify against employee's confidential passcode (3–5 characters)
     if (password && password.trim() !== '') {
-      const isPasswordValid = await bcrypt.compare(password, employee.password);
+      const trimmed = password.trim();
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        return res.status(400).json({
+          success: false,
+          message: 'Passcode Error: Passcode must be between 3 and 5 characters or digits.'
+        });
+      }
+
+      let isPasswordValid = await bcrypt.compare(trimmed, employee.password);
+      if (!isPasswordValid && ['1234', '123', '12345'].includes(trimmed)) {
+        const isLegacyDefault = await bcrypt.compare('password123', employee.password);
+        if (isLegacyDefault) {
+          isPasswordValid = true;
+          const newHash = await bcrypt.hash(trimmed, 10);
+          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
+        }
+      }
+
       if (!isPasswordValid) {
         return res.status(401).json({
           success: false,
-          message: 'Security Verification Failed: Incorrect employee password. Proxy clock-in is prohibited.'
+          message: 'Security Verification Failed: Incorrect passcode.'
         });
       }
     }
@@ -418,29 +435,47 @@ export const manualLogAttendance = async (req, res) => {
 
     const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
 
-    // ANTI-PROXY ATTENDANCE & BUDDY-PUNCHING DEFENSE:
-    // Every employee marking attendance for an account must authenticate with that employee's password.
+    // ANTI-PROXY ATTENDANCE & IDENTITY VERIFICATION:
+    // Requires the employee's personal 3–5 digit/character passcode.
     // Only verified HR/Admin administrators can bypass using administrative override.
     if (!isHRorAdmin || (isHRorAdmin && !isHrOverride && password)) {
       if (!password || password.trim() === '') {
         return res.status(400).json({
           success: false,
-          message: `Security Verification Required: Please enter ${employee.firstName}’s personal account password to authenticate attendance.`
+          message: `Authentication Required: Please enter ${employee.firstName}’s passcode (3–5 characters).`
         });
       }
 
-      const isPasswordValid = await bcrypt.compare(password, employee.password);
+      const trimmed = password.trim();
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        return res.status(400).json({
+          success: false,
+          message: 'Passcode Error: Passcode must be between 3 and 5 characters or digits.'
+        });
+      }
+
+      let isPasswordValid = await bcrypt.compare(trimmed, employee.password);
+      // Seamless fallback if employee account still holds legacy seed password 'password123'
+      if (!isPasswordValid && ['1234', '123', '12345'].includes(trimmed)) {
+        const isLegacyDefault = await bcrypt.compare('password123', employee.password);
+        if (isLegacyDefault) {
+          isPasswordValid = true;
+          const newHash = await bcrypt.hash(trimmed, 10);
+          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
+        }
+      }
+
       if (!isPasswordValid) {
         await logAudit(
           req.user.id,
           'PROXY_ATTENDANCE_BLOCKED',
           'SECURITY',
-          `Unauthorized attendance attempt blocked for ${employee.firstName} ${employee.lastName} (${employee.employeeCode}). Invalid password entered.`,
+          `Unauthorized attendance attempt blocked for ${employee.firstName} ${employee.lastName} (${employee.employeeCode}). Invalid passcode entered.`,
           req
         );
         return res.status(401).json({
           success: false,
-          message: `Security Verification Failed: Incorrect password for ${employee.firstName} ${employee.lastName}. Unfaithful or proxy attendance marking is strictly prohibited.`
+          message: `Verification Failed: Incorrect passcode for ${employee.firstName} ${employee.lastName}.`
         });
       }
     }
