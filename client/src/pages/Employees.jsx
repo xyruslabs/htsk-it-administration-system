@@ -822,166 +822,184 @@ export const Employees = () => {
         </div>
       )}
 
-      {/* Manual Attendance Logging Modal */}
+      {/* Record Attendance Modal */}
       {attendanceModalOpen && selectedAttendanceEmp && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl space-y-5 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <CalendarPlus size={20} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>Record Attendance</span>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                  Log Attendance
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Adding attendance for <strong className="text-slate-800 dark:text-slate-200">{selectedAttendanceEmp.firstName} {selectedAttendanceEmp.lastName}</strong> ({selectedAttendanceEmp.employeeCode})
+                  Record shift hours for team members.
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setAttendanceModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
-                <X size={16} />
+                <X size={17} />
               </button>
             </div>
 
             <form onSubmit={handleManualAttendanceSubmit} className="space-y-4">
-              {/* Anti-Proxy Password Security Shield Box */}
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2.5">
-                <div className="flex items-start gap-2">
-                  <ShieldCheck size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              {/* Employee Summary Card */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-900 dark:bg-slate-700 text-white flex items-center justify-center font-bold text-xs tracking-wider">
+                    {selectedAttendanceEmp.firstName[0]}
+                    {selectedAttendanceEmp.lastName[0]}
+                  </div>
                   <div>
-                    <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                      Anti-Proxy Security Protection (No Buddy-Punching)
-                    </h5>
-                    <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-relaxed mt-0.5">
-                      To prevent unauthorized or unfaithful attendance marking, please verify identity by entering the employee's personal account password.
-                    </p>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs">
+                      {selectedAttendanceEmp.firstName} {selectedAttendanceEmp.lastName}
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {selectedAttendanceEmp.employeeCode} · {selectedAttendanceEmp.designation}
+                    </div>
                   </div>
                 </div>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                  {selectedAttendanceEmp.department?.name || 'General'}
+                </span>
+              </div>
 
-                {canManage && (
-                  <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between">
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+              {/* Password Verification Field */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Lock size={12} className="text-slate-400" />
+                    <span>Employee Password</span>
+                    <span className="text-slate-400 font-normal">(Verification)</span>
+                  </label>
+                  {canManage && (
+                    <label className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={isAttendanceHrOverride}
                         onChange={(e) => setIsAttendanceHrOverride(e.target.checked)}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                        className="rounded border-slate-300 text-slate-900 dark:text-emerald-500 focus:ring-0 h-3.5 w-3.5"
                       />
-                      <span>Authorized HR / Admin Override (Bypass employee password)</span>
+                      <span>Admin bypass</span>
                     </label>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {(!canManage || !isAttendanceHrOverride) && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Employee Account Password <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showAttendancePassword ? 'text' : 'password'}
-                        required={!isAttendanceHrOverride}
-                        value={attendanceData.password}
-                        onChange={(e) => setAttendanceData({ ...attendanceData, password: e.target.value })}
-                        placeholder="Enter employee's personal password..."
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 pr-10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-mono"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAttendancePassword(!showAttendancePassword)}
-                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        {showAttendancePassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
-                    </div>
+                  <div className="relative">
+                    <input
+                      type={showAttendancePassword ? 'text' : 'password'}
+                      required={!isAttendanceHrOverride}
+                      value={attendanceData.password}
+                      onChange={(e) => setAttendanceData({ ...attendanceData, password: e.target.value })}
+                      placeholder="Enter employee password to authorize entry..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 pr-9 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAttendancePassword(!showAttendancePassword)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-0.5 cursor-pointer"
+                      tabIndex={-1}
+                    >
+                      {showAttendancePassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
                   </div>
                 )}
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Required to authenticate this attendance record.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Attendance Date
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={attendanceData.date}
-                  onChange={(e) => setAttendanceData({ ...attendanceData, date: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
+              {/* Date & Status */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Clock In Time
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={attendanceData.date}
+                    onChange={(e) => setAttendanceData({ ...attendanceData, date: e.target.value })}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={attendanceData.status}
+                    onChange={(e) => setAttendanceData({ ...attendanceData, status: e.target.value })}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
+                  >
+                    <option value="PRESENT">Present</option>
+                    <option value="LATE">Late Arrival</option>
+                    <option value="HALF_DAY">Half Day</option>
+                    <option value="ABSENT">Absent</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Shift Hours */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Clock In
                   </label>
                   <input
                     type="time"
                     required
                     value={attendanceData.clockIn}
                     onChange={(e) => setAttendanceData({ ...attendanceData, clockIn: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Clock Out Time (Optional)
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Clock Out <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <input
                     type="time"
                     value={attendanceData.clockOut}
                     onChange={(e) => setAttendanceData({ ...attendanceData, clockOut: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
                   />
                 </div>
               </div>
 
+              {/* Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Status
-                </label>
-                <select
-                  value={attendanceData.status}
-                  onChange={(e) => setAttendanceData({ ...attendanceData, status: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                >
-                  <option value="PRESENT">PRESENT (Standard)</option>
-                  <option value="LATE">LATE</option>
-                  <option value="HALF_DAY">HALF DAY</option>
-                  <option value="ABSENT">ABSENT</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Notes / Reason
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Notes <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Field assignment, approved retroactive punch"
                   value={attendanceData.notes}
                   onChange={(e) => setAttendanceData({ ...attendanceData, notes: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  placeholder="e.g. Field assignment, approved manual shift"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setAttendanceModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 transition shadow-xs cursor-pointer disabled:opacity-50"
                 >
-                  <CheckCircle2 size={14} />
-                  <span>{actionLoading ? 'Saving...' : 'Save Attendance'}</span>
+                  {actionLoading ? 'Saving...' : 'Save Record'}
                 </button>
               </div>
             </form>
