@@ -12,7 +12,6 @@ import { FloorMonitor } from './pages/FloorMonitor';
 import { Attendance } from './pages/Attendance';
 import { LeaveManagement } from './pages/LeaveManagement';
 import { Employees } from './pages/Employees';
-import { Payroll } from './pages/Payroll';
 import { AuditLogs } from './pages/AuditLogs';
 
 export function App() {
@@ -85,17 +84,6 @@ export function App() {
               <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'MANAGER']}>
                 <Layout>
                   <Employees />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/payroll"
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'EMPLOYEE']}>
-                <Layout>
-                  <Payroll />
                 </Layout>
               </ProtectedRoute>
             }

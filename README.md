@@ -20,7 +20,7 @@ All accounts use password: `password123`
 | Role | Name | Email | Primary Responsibilities |
 | :--- | :--- | :--- | :--- |
 | **Super Admin** | Sarah Vance | `admin@smarthr.io` | Org structure, system-wide audits, security compliance |
-| **HR Manager** | Marcus Sterling | `hr@smarthr.io` | Employee directory, leave policy allocations, payroll engine |
+| **HR Manager** | Marcus Sterling | `hr@smarthr.io` | Employee directory, leave policy allocations, workforce analytics |
 | **Team Lead / Manager** | David Chen | `lead@smarthr.io` | Live floor attendance monitoring, leave approvals |
 | **Employee** | Elena Rostova | `employee@smarthr.io` | Quick clock-in/out (<5s), break session logging, leave apply |
 
@@ -48,14 +48,13 @@ All accounts use password: `password123`
    - Quota tracking across `ANNUAL`, `MEDICAL`, `CASUAL`, and `UNPAID` categories.
    - Manager approval workflow with reviewer notes and decision audit trail.
 
-4. **Monthly Payroll Summary Generator**:
-   - Aggregates actual attendance days worked.
-   - Automatically computes deductions for unpaid absences and statutory amounts.
-   - Supports payroll generation and multi-tier status authorization (`DRAFT` &rarr; `APPROVED` &rarr; `PAID`).
+4. **Workforce Analytics & Roster Engine**:
+   - Automated aggregation of shifts and team availability.
+   - Real-time exception notifications and overtime adherence tracking.
 
 5. **Live Floor Attendance Monitor**:
    - Real-time KPI counters: *Active On Duty*, *On Break*, *On Leave*, *Absent/Late*.
    - Filterable data grid with active break indicators and auto-refresh capability.
 
 6. **Audit & Compliance Hub**:
-   - Immutable security log stream capturing every sign-in, clock event, leave review, and payroll calculation.
+   - Immutable security log stream capturing every sign-in, clock event, leave review, and administrative action.

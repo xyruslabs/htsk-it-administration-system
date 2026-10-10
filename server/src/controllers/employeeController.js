@@ -37,8 +37,6 @@ export const getAllEmployees = async (req, res) => {
         manager: { select: { id: true, firstName: true, lastName: true, email: true } },
         phone: true,
         joinDate: true,
-        hourlyRate: true,
-        baseSalary: true,
         createdAt: true
       },
       orderBy: { employeeCode: 'asc' }
@@ -75,8 +73,6 @@ export const getEmployeeById = async (req, res) => {
         subordinates: { select: { id: true, firstName: true, lastName: true, employeeCode: true, designation: true } },
         phone: true,
         joinDate: true,
-        hourlyRate: true,
-        baseSalary: true,
         leaveBalances: true,
         createdAt: true
       }

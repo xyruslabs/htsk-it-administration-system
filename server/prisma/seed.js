@@ -8,7 +8,6 @@ async function main() {
 
   // Clear existing
   await prisma.auditLog.deleteMany();
-  await prisma.payroll.deleteMany();
   await prisma.breakSession.deleteMany();
   await prisma.attendance.deleteMany();
   await prisma.leaveRequest.deleteMany();
@@ -45,7 +44,7 @@ async function main() {
     data: {
       name: 'Finance & Accounting',
       code: 'FIN',
-      description: 'Corporate payroll, statutory reporting, budget allocation'
+      description: 'Fiscal governance, statutory reporting, budget allocation'
     }
   });
 
@@ -266,23 +265,6 @@ async function main() {
       approverId: hrManager.id,
       reviewNotes: 'Approved. Enjoy your time off.',
       reviewedAt: new Date(Date.now() - 86400000)
-    }
-  });
-
-  // Sample Payroll Draft for last month
-  await prisma.payroll.create({
-    data: {
-      employeeId: emp1.id,
-      month: 9,
-      year: 2026,
-      baseSalary: 5200.0,
-      daysWorked: 22,
-      unpaidLeaveDays: 0,
-      deductions: 250.0,
-      bonuses: 300.0,
-      netSalary: 5250.0,
-      status: 'APPROVED',
-      notes: 'Standard September settlement with Q3 performance bonus'
     }
   });
 

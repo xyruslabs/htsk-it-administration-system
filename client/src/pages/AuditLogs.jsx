@@ -63,7 +63,7 @@ export const AuditLogs = () => {
             </span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time tracking of security logins, timekeeping modifications, payroll executions, and privilege changes.
+            Real-time tracking of security logins, timekeeping modifications, access reviews, and privilege changes.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export const AuditLogs = () => {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-          {['', 'AUTH', 'ATTENDANCE', 'LEAVE', 'PAYROLL', 'EMPLOYEE'].map((res) => (
+          {['', 'AUTH', 'ATTENDANCE', 'LEAVE', 'EMPLOYEE'].map((res) => (
             <button
               key={res}
               onClick={() => setFilterResource(res)}

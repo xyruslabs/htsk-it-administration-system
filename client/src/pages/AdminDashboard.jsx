@@ -337,34 +337,34 @@ export const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Metric 5: Monthly Payroll */}
+        {/* Metric 5: Shift Fulfillment */}
         <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Monthly Payroll</span>
-            <DollarSign size={14} className="text-emerald-500" />
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Shift Fulfillment</span>
+            <Users size={14} className="text-emerald-500" />
           </div>
           <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 dark:text-emerald-400 mt-2 font-display tracking-tight">
-            $32,700
+            98.4%
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Est. disbursements</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Roster adherence</p>
             <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
-              Audited
+              Optimal
             </span>
           </div>
         </div>
 
-        {/* Metric 6: Operating Margin */}
+        {/* Metric 6: Total Work Hours */}
         <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Operating Margin</span>
-            <TrendingUp size={14} className="text-blue-500" />
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Logged Hours</span>
+            <Clock size={14} className="text-blue-500" />
           </div>
           <div className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mt-2 font-display tracking-tight">
-            $5,544
+            1,420 Hrs
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">This week net</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">This week active</p>
             <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center font-mono">
               <ArrowUpRight size={12} /> +14.2%
             </span>
@@ -837,7 +837,7 @@ export const AdminDashboard = () => {
                     PRO-002
                   </td>
                   <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
-                    Payroll & Statutory Compliance Engine
+                    Workforce Security & Access Compliance
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">

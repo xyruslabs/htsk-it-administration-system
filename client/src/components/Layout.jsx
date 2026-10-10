@@ -8,7 +8,6 @@ import {
   Clock,
   CalendarDays,
   Users,
-  Banknote,
   ShieldAlert,
   LogOut,
   Building2,
@@ -124,14 +123,8 @@ export const Layout = ({ children }) => {
       ]
     },
     {
-      group: 'Finance & Compliance',
+      group: 'Security & Compliance',
       items: [
-        {
-          label: 'Payroll Engine',
-          path: '/payroll',
-          icon: Banknote,
-          roles: ['ADMIN', 'HR', 'EMPLOYEE']
-        },
         {
           label: 'Audit & Compliance',
           path: '/audit-logs',
@@ -177,8 +170,6 @@ export const Layout = ({ children }) => {
         return { section: 'HR Workforce', page: 'Leave Management' };
       case '/employees':
         return { section: 'Human Resources', page: 'Employee Directory' };
-      case '/payroll':
-        return { section: 'Finance', page: 'Payroll Engine' };
       case '/audit-logs':
         return { section: 'Security', page: 'Audit & Compliance' };
       default:
@@ -207,11 +198,11 @@ export const Layout = ({ children }) => {
     },
     {
       id: 3,
-      title: 'Monthly Payroll Run Prepared',
-      desc: 'Q4 disbursements draft ready for final review',
+      title: 'Biometric Terminals Synced',
+      desc: 'All regional terminal logs synchronized successfully',
       time: '2 hours ago',
       unread: false,
-      type: 'payroll'
+      type: 'system'
     }
   ];
 
@@ -428,7 +419,7 @@ export const Layout = ({ children }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                placeholder="Search modules, roster, payroll..."
+                placeholder="Search modules, roster, attendance..."
                 className="w-full pl-9 pr-18 py-1.5 text-xs bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               />
               <div className="absolute right-2 flex items-center pointer-events-none">
