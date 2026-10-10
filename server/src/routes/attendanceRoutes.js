@@ -6,7 +6,8 @@ import {
   startBreak,
   endBreak,
   getAttendanceHistory,
-  getLiveFloorMonitor
+  getLiveFloorMonitor,
+  manualLogAttendance
 } from '../controllers/attendanceController.js';
 import { authenticate } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ router.use(authenticate);
 router.get('/today', getTodayAttendanceStatus);
 router.post('/clock-in', clockIn);
 router.post('/clock-out', clockOut);
+router.post('/manual', manualLogAttendance);
 router.post('/break/start', startBreak);
 router.post('/break/end', endBreak);
 

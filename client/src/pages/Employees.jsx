@@ -19,6 +19,8 @@ import {
   Clock,
   ShieldCheck,
   UserCheck,
+  CalendarPlus,
+  Lock,
   X
 } from 'lucide-react';
 
@@ -33,6 +35,18 @@ export const Employees = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+
+  // Manual Attendance Modal State
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
+  const [selectedAttendanceEmp, setSelectedAttendanceEmp] = useState(null);
+  const [attendanceData, setAttendanceData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    clockIn: '09:00',
+    clockOut: '17:30',
+    status: 'PRESENT',
+    notes: ''
+  });
+
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -111,7 +125,23 @@ export const Employees = () => {
     }
   };
 
+  const canManage = ['ADMIN', 'HR'].includes(user?.role);
+
+  const canEditEmployee = (emp) => {
+    if (canManage) return true;
+    return user?.id === emp.id || user?.email?.toLowerCase() === emp.email?.toLowerCase();
+  };
+
+  const canLogAttendance = (emp) => {
+    if (canManage) return true;
+    return user?.id === emp.id || user?.email?.toLowerCase() === emp.email?.toLowerCase();
+  };
+
   const handleOpenEdit = (emp) => {
+    if (!canEditEmployee(emp)) {
+      showToast('Security Violation: You do not have permission to modify another employee’s profile.', 'error');
+      return;
+    }
     setEditingEmployee(emp);
     setEditData({
       firstName: emp.firstName,
@@ -122,6 +152,45 @@ export const Employees = () => {
       departmentId: emp.departmentId || ''
     });
     setEditModalOpen(true);
+  };
+
+  const handleOpenAttendance = (emp) => {
+    if (!canLogAttendance(emp)) {
+      showToast('Security Violation: You do not have permission to log attendance for another employee.', 'error');
+      return;
+    }
+    setSelectedAttendanceEmp(emp);
+    setAttendanceData({
+      date: new Date().toISOString().split('T')[0],
+      clockIn: '09:00',
+      clockOut: '17:30',
+      status: 'PRESENT',
+      notes: ''
+    });
+    setAttendanceModalOpen(true);
+  };
+
+  const handleManualAttendanceSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedAttendanceEmp) return;
+    try {
+      setActionLoading(true);
+      const res = await api.post('/attendance/manual', {
+        employeeId: selectedAttendanceEmp.id,
+        date: attendanceData.date,
+        clockIn: attendanceData.clockIn,
+        clockOut: attendanceData.clockOut,
+        status: attendanceData.status,
+        notes: attendanceData.notes
+      });
+      showToast(res.data.message || 'Attendance logged successfully', 'success');
+      setAttendanceModalOpen(false);
+      setSelectedAttendanceEmp(null);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to record manual attendance', 'error');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleUpdateEmployee = async (e) => {
@@ -166,8 +235,6 @@ export const Employees = () => {
       setActionLoading(false);
     }
   };
-
-  const canManage = ['ADMIN', 'HR'].includes(user?.role);
 
   // Group employees
   const activeEmployees = employees.filter((e) => e.status === 'ACTIVE');
@@ -426,15 +493,42 @@ export const Employees = () => {
                     </span>
                   ) : null}
 
-                  {/* Edit / Update Profile Button (Accessible to all employees) */}
-                  <button
-                    onClick={() => handleOpenEdit(emp)}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
-                    title="Update Employee Details"
-                  >
-                    <Edit3 size={13} />
-                    <span>Edit</span>
-                  </button>
+                  {/* Active Employee Actions: Add Attendance + Edit */}
+                  {emp.status === 'ACTIVE' && (
+                    <>
+                      {/* Manually Add Attendance Button */}
+                      {canLogAttendance(emp) && (
+                        <button
+                          onClick={() => handleOpenAttendance(emp)}
+                          className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
+                          title="Record Attendance Manually"
+                        >
+                          <CalendarPlus size={13} />
+                          <span>+ Attendance</span>
+                        </button>
+                      )}
+
+                      {/* Edit / Update Profile Button (Restricted to Admin, HR, or own profile) */}
+                      {canEditEmployee(emp) ? (
+                        <button
+                          onClick={() => handleOpenEdit(emp)}
+                          className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
+                          title="Update Profile Details"
+                        >
+                          <Edit3 size={13} />
+                          <span>Edit</span>
+                        </button>
+                      ) : (
+                        <span
+                          className="px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-900/60 text-slate-400 dark:text-slate-500 border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-1 text-[11px]"
+                          title="Protected: You do not have permission to modify another employee's profile"
+                        >
+                          <Lock size={12} />
+                          <span>Protected</span>
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -705,6 +799,119 @@ export const Employees = () => {
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Attendance Logging Modal */}
+      {attendanceModalOpen && selectedAttendanceEmp && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <CalendarPlus size={20} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Record Attendance</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Adding attendance for <strong className="text-slate-800 dark:text-slate-200">{selectedAttendanceEmp.firstName} {selectedAttendanceEmp.lastName}</strong> ({selectedAttendanceEmp.employeeCode})
+                </p>
+              </div>
+              <button
+                onClick={() => setAttendanceModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleManualAttendanceSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Attendance Date
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={attendanceData.date}
+                  onChange={(e) => setAttendanceData({ ...attendanceData, date: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Clock In Time
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={attendanceData.clockIn}
+                    onChange={(e) => setAttendanceData({ ...attendanceData, clockIn: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Clock Out Time (Optional)
+                  </label>
+                  <input
+                    type="time"
+                    value={attendanceData.clockOut}
+                    onChange={(e) => setAttendanceData({ ...attendanceData, clockOut: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Status
+                </label>
+                <select
+                  value={attendanceData.status}
+                  onChange={(e) => setAttendanceData({ ...attendanceData, status: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="PRESENT">PRESENT (Standard)</option>
+                  <option value="LATE">LATE</option>
+                  <option value="HALF_DAY">HALF DAY</option>
+                  <option value="ABSENT">ABSENT</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Notes / Reason
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Field assignment, approved retroactive punch"
+                  value={attendanceData.notes}
+                  onChange={(e) => setAttendanceData({ ...attendanceData, notes: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setAttendanceModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <CheckCircle2 size={14} />
+                  <span>{actionLoading ? 'Saving...' : 'Save Attendance'}</span>
                 </button>
               </div>
             </form>

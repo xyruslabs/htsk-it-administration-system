@@ -383,3 +383,97 @@ export const getLiveFloorMonitor = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const manualLogAttendance = async (req, res) => {
+  try {
+    const { employeeId, date, clockIn, clockOut, status = 'PRESENT', notes } = req.body;
+    const targetEmployeeId = employeeId || req.user.id;
+    const recordDate = date || getTodayStr();
+
+    // Verify employee exists
+    const employee = await prisma.employee.findUnique({
+      where: { id: targetEmployeeId }
+    });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Target employee not found.' });
+    }
+
+    // Permission check: ADMIN, HR, or the employee themselves can record attendance
+    const isSelf = req.user.id === targetEmployeeId || req.user.email?.toLowerCase() === employee.email?.toLowerCase();
+    const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
+
+    if (!isHRorAdmin && !isSelf) {
+      return res.status(403).json({
+        success: false,
+        message: 'Security Violation: You do not have permission to log attendance for another employee.'
+      });
+    }
+
+    // Parse clockIn and clockOut
+    let clockInDateTime;
+    if (clockIn) {
+      clockInDateTime = new Date(clockIn.includes('T') ? clockIn : `${recordDate}T${clockIn}:00`);
+      if (isNaN(clockInDateTime.getTime())) {
+        clockInDateTime = new Date(`${recordDate}T09:00:00`);
+      }
+    } else {
+      clockInDateTime = new Date(`${recordDate}T09:00:00`);
+    }
+
+    let clockOutDateTime = null;
+    let totalWorkMins = 0;
+    if (clockOut) {
+      clockOutDateTime = new Date(clockOut.includes('T') ? clockOut : `${recordDate}T${clockOut}:00`);
+      if (!isNaN(clockOutDateTime.getTime()) && clockOutDateTime > clockInDateTime) {
+        totalWorkMins = Math.round((clockOutDateTime.getTime() - clockInDateTime.getTime()) / (1000 * 60));
+      }
+    }
+
+    const attendance = await prisma.attendance.upsert({
+      where: {
+        employeeId_date: {
+          employeeId: targetEmployeeId,
+          date: recordDate
+        }
+      },
+      update: {
+        clockIn: clockInDateTime,
+        clockOut: clockOutDateTime,
+        status: status || 'PRESENT',
+        totalWorkMins,
+        notes: notes || 'Manually logged attendance'
+      },
+      create: {
+        employeeId: targetEmployeeId,
+        date: recordDate,
+        clockIn: clockInDateTime,
+        clockOut: clockOutDateTime,
+        status: status || 'PRESENT',
+        totalWorkMins,
+        notes: notes || 'Manually logged attendance'
+      },
+      include: {
+        employee: {
+          select: { id: true, firstName: true, lastName: true, employeeCode: true }
+        }
+      }
+    });
+
+    await logAudit(
+      req.user.id,
+      'MANUAL_ATTENDANCE_LOG',
+      'ATTENDANCE',
+      `Manual attendance logged for ${employee.firstName} ${employee.lastName} on ${recordDate} (${status})`,
+      req
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Manual attendance recorded successfully for ${employee.firstName} ${employee.lastName}`,
+      attendance
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -176,6 +176,23 @@ export const createEmployee = async (req, res) => {
 export const updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Security check: Only Admin, HR, or the employee themselves can edit profile
+    const existing = await prisma.employee.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    const isSelf = req.user.id === id || req.user.email?.toLowerCase() === existing.email?.toLowerCase();
+    const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
+
+    if (!isHRorAdmin && !isSelf) {
+      return res.status(403).json({
+        success: false,
+        message: 'Security Violation: You do not have permission to modify another employee’s profile.'
+      });
+    }
+
     const {
       firstName,
       lastName,
