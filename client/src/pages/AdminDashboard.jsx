@@ -409,12 +409,15 @@ export const AdminDashboard = () => {
       {/* Signature High-Impact Workforce Pulse & Real-Time Velocity Bento (WhiteBIT / Linear Tier) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Feature Card: Signature Volt Lime Card (Mirrors Reference Slide 4 'What is Crypto Lending') */}
-        <div className="lg:col-span-5 bg-[#D2FD41] text-[#0A0E1A] rounded-3xl p-6 sm:p-7 shadow-sm border border-lime-300/40 flex flex-col justify-between relative overflow-hidden">
+        <div className="lg:col-span-5 bg-[#D2FD41] text-[#0A0E1A] rounded-3xl p-6 sm:p-7 shadow-sm border border-lime-300/50 flex flex-col justify-between relative overflow-hidden">
           <div className="absolute -right-8 -bottom-8 w-44 h-44 rounded-full border border-lime-500/20 pointer-events-none" />
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0A0E1A] text-white text-[10px] font-extrabold font-display tracking-wider uppercase mb-3">
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0A0E1A] text-white text-[10px] font-extrabold font-display tracking-wider uppercase mb-3 shadow-xs"
+              data-dark-contrast="true"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-[#D2FD41] animate-pulse" />
-              Live Operational Pulse
+              <span style={{ color: '#FFFFFF' }}>Live Operational Pulse</span>
             </div>
             <h3 className="font-display font-black text-2xl sm:text-3xl tracking-tight leading-tight text-[#0A0E1A]">
               Floor Attendance & Biometric Velocity
@@ -425,61 +428,64 @@ export const AdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-6 relative z-10">
-            <div className="bg-[#0A0E1A] text-white p-3.5 rounded-2xl">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+            <div className="bg-[#0A0E1A] p-4 rounded-2xl shadow-xs" data-dark-contrast="true">
+              <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider font-display">
                 Present On Floor
               </div>
               <div className="font-display font-bold text-2xl sm:text-3xl text-[#D2FD41] mt-1 tracking-tight">
                 {Math.round(((onDuty + onBreak) / (totalEmployees || 1)) * 100)}%
               </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">SLA Target: 90%</p>
+              <p className="text-[10px] text-slate-300 mt-0.5">SLA Target: 90%</p>
             </div>
 
-            <div className="bg-[#0A0E1A] text-white p-3.5 rounded-2xl">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+            <div className="bg-[#0A0E1A] p-4 rounded-2xl shadow-xs" data-dark-contrast="true">
+              <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider font-display">
                 Break Compliance
               </div>
-              <div className="font-display font-bold text-2xl sm:text-3xl text-white mt-1 tracking-tight">
+              <div
+                className="font-display font-bold text-2xl sm:text-3xl text-white mt-1 tracking-tight"
+                style={{ color: '#FFFFFF' }}
+              >
                 99.4%
               </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">Zero drift logged</p>
+              <p className="text-[10px] text-slate-300 mt-0.5">Zero drift logged</p>
             </div>
           </div>
         </div>
 
-        {/* Right Feature Card: Deep Midnight Navy Card with Equalizer (Mirrors Reference Slide 4 'How it works') */}
-        <div className="lg:col-span-7 bg-[#0A0E1A] dark:bg-[#10162A] text-white rounded-3xl p-6 sm:p-7 border border-[#1E2945] shadow-sm flex flex-col justify-between">
+        {/* Right Feature Card: Adaptive Dual-Theme Card with Equalizer (Crisp contrast in Light & Dark) */}
+        <div className="lg:col-span-7 bg-white dark:bg-[#10162A] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-[#1E2945] shadow-xs dark:shadow-md flex flex-col justify-between transition-colors">
           <div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D2FD41] font-display">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600 dark:text-[#D2FD41] font-display">
                   Real-Time Floor Frequency
                 </span>
-                <h3 className="font-display font-bold text-xl sm:text-2xl text-white mt-0.5 tracking-tight">
+                <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-900 dark:text-white mt-0.5 tracking-tight">
                   Active Shift Velocity & Roster Load
                 </h3>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                Live Feed
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-white/10 text-emerald-700 dark:text-white border border-emerald-200 dark:border-white/10 text-xs font-bold font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>Live Feed</span>
               </div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
               Continuous live telemetry across all operational floors, meeting pods, and authorized break rooms.
             </p>
 
             {/* Signature Equalizer Bar Graph Visualization from Reference Slide 4 */}
-            <div className="mt-5 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-end justify-between gap-1.5 h-20">
+            <div className="mt-5 p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.08] flex items-end justify-between gap-1.5 h-20">
               {[28, 45, 68, 38, 92, 54, 78, 98, 42, 85, 62, 90, 72, 88, 52, 96].map((h, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                   <div
                     style={{ height: `${h}%` }}
                     className={`w-full rounded-full transition-all duration-500 ${
                       i % 3 === 0
-                        ? 'bg-[#D2FD41]'
+                        ? 'bg-emerald-500 dark:bg-[#D2FD41]'
                         : i % 2 === 0
-                        ? 'bg-emerald-400'
-                        : 'bg-white/40'
+                        ? 'bg-slate-700 dark:bg-emerald-400'
+                        : 'bg-slate-300 dark:bg-white/30'
                     }`}
                   />
                 </div>
@@ -488,30 +494,38 @@ export const AdminDashboard = () => {
           </div>
 
           {/* 4 Large Clean Stats Strip from Reference Slide 4 (40+, 6, 600K $, 1 click) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-5 border-t border-white/[0.08]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-5 border-t border-slate-100 dark:border-white/[0.08]">
             <div>
-              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
                 {totalEmployees}+
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5 font-medium">Active Personnel</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                Active Personnel
+              </div>
             </div>
             <div>
-              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
                 6
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5 font-medium">Departments</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                Departments
+              </div>
             </div>
             <div>
-              <div className="font-display font-semibold text-2xl sm:text-3xl text-[#D2FD41] tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-emerald-600 dark:text-[#D2FD41] tracking-tight">
                 99.9%
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5 font-medium">System Uptime</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                System Uptime
+              </div>
             </div>
             <div>
-              <div className="font-display font-semibold text-2xl sm:text-3xl text-white tracking-tight">
+              <div className="font-display font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
                 1 Click
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5 font-medium">HR Approval</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                HR Approval
+              </div>
             </div>
           </div>
         </div>

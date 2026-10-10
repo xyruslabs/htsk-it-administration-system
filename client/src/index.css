@@ -79,8 +79,13 @@
 
 /* Light Theme Automatic Contrast Adaptations */
 html:not(.dark) {
-  /* Headings & prominent titles */
-  h1, h2, h3, h4, h5, h6 {
+  /* Headings & prominent titles (except intentional dark containers) */
+  h1:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *),
+  h2:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *),
+  h3:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *),
+  h4:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *),
+  h5:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *),
+  h6:not(.bg-\[\#0A0E1A\] *):not([data-dark-contrast] *) {
     color: #0F172A !important;
   }
 
@@ -138,9 +143,25 @@ html:not(.dark) {
     color: #000000 !important;
   }
 
-  /* Neutralize hardcoded text-white in light mode cards and tables */
-  .text-white:not(button.bg-emerald-600 *):not(button.bg-rose-600 *):not(button.bg-blue-600 *):not(.bg-\[\#090D16\] *) {
+  /* Neutralize hardcoded text-white in light mode cards and tables (except intentional dark containers) */
+  .text-white:not(button.bg-emerald-600 *):not(button.bg-rose-600 *):not(button.bg-blue-600 *):not(.bg-\[\#090D16\] *):not(.bg-\[\#0A0E1A\] *):not(.bg-slate-950 *):not([data-dark-contrast] *) {
     color: #0F172A !important;
+  }
+
+  /* Explicitly protect crisp white and light text inside dark elements in light theme */
+  .bg-\[\#0A0E1A\],
+  .bg-\[\#0A0E1A\] .text-white,
+  .bg-\[\#0A0E1A\] [data-white-text],
+  .bg-slate-950 .text-white,
+  [data-dark-contrast] .text-white {
+    color: #FFFFFF !important;
+  }
+
+  .bg-\[\#0A0E1A\] .text-slate-300,
+  .bg-\[\#0A0E1A\] .text-slate-400,
+  [data-dark-contrast] .text-slate-300,
+  [data-dark-contrast] .text-slate-400 {
+    color: #CBD5E1 !important;
   }
 
   .text-slate-200 {
