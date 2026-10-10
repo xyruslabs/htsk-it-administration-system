@@ -4,6 +4,13 @@ An enterprise-grade workforce management, attendance tracking, and operations pl
 
 ---
 
+## 🌐 Live Application
+
+- **Production Portal**: [https://smarthr-enterprise.vercel.app/login](https://smarthr-enterprise.vercel.app/login)
+- **API Status & Health**: `https://smarthr-backend-h60c.onrender.com/api/health`
+
+---
+
 ## 🏛️ Architecture & Tech Stack
 
 - **Backend**: Node.js + Express.js modular MVC (`routes/`, `controllers/`, `middleware/`, `utils/`)
@@ -11,7 +18,7 @@ An enterprise-grade workforce management, attendance tracking, and operations pl
 - **Security & RBAC**: JWT stateless tokens, bcrypt password hashing, role-based protection
 - **Frontend**: React 19 (Vite SPA) + Tailwind CSS + Lucide Icons + React Router v7 + Axios
 - **Deployment**:
-  - **Frontend**: Vercel (`client/dist`) with SPA rewrite rules
+  - **Frontend**: Vercel (`client/dist`) — [https://smarthr-enterprise.vercel.app/login](https://smarthr-enterprise.vercel.app/login)
   - **Backend**: Render (`server/`) Web Service
   - **Database**: Neon Serverless PostgreSQL
 
