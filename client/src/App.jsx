@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { SplashScreen } from './components/SplashScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -26,8 +27,9 @@ export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-        <BrowserRouter>
+        <ErrorBoundary>
+          {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+          <BrowserRouter>
         <Routes>
           {/* Public login portal */}
           <Route path="/login" element={<Login />} />
@@ -104,6 +106,7 @@ export function App() {
           <Route path="*" element={<Navigate to="/floor-monitor" replace />} />
         </Routes>
       </BrowserRouter>
+      </ErrorBoundary>
     </AuthProvider>
     </ThemeProvider>
   );

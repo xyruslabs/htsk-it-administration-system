@@ -35,7 +35,8 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  UserCheck
 } from 'lucide-react';
 
 export const Layout = ({ children }) => {
