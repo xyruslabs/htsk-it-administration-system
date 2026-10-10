@@ -21,6 +21,8 @@ import {
   UserCheck,
   CalendarPlus,
   Lock,
+  Eye,
+  EyeOff,
   X
 } from 'lucide-react';
 
@@ -39,12 +41,15 @@ export const Employees = () => {
   // Manual Attendance Modal State
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [selectedAttendanceEmp, setSelectedAttendanceEmp] = useState(null);
+  const [showAttendancePassword, setShowAttendancePassword] = useState(false);
+  const [isAttendanceHrOverride, setIsAttendanceHrOverride] = useState(false);
   const [attendanceData, setAttendanceData] = useState({
     date: new Date().toISOString().split('T')[0],
     clockIn: '09:00',
     clockOut: '17:30',
     status: 'PRESENT',
-    notes: ''
+    notes: '',
+    password: ''
   });
 
   const [actionLoading, setActionLoading] = useState(false);
@@ -160,12 +165,15 @@ export const Employees = () => {
       return;
     }
     setSelectedAttendanceEmp(emp);
+    setShowAttendancePassword(false);
+    setIsAttendanceHrOverride(false);
     setAttendanceData({
       date: new Date().toISOString().split('T')[0],
       clockIn: '09:00',
       clockOut: '17:30',
       status: 'PRESENT',
-      notes: ''
+      notes: '',
+      password: ''
     });
     setAttendanceModalOpen(true);
   };
@@ -173,6 +181,12 @@ export const Employees = () => {
   const handleManualAttendanceSubmit = async (e) => {
     e.preventDefault();
     if (!selectedAttendanceEmp) return;
+
+    if ((!canManage || !isAttendanceHrOverride) && (!attendanceData.password || attendanceData.password.trim() === '')) {
+      showToast('Security Verification Required: Please enter the employee’s password.', 'error');
+      return;
+    }
+
     try {
       setActionLoading(true);
       const res = await api.post('/attendance/manual', {
@@ -181,7 +195,9 @@ export const Employees = () => {
         clockIn: attendanceData.clockIn,
         clockOut: attendanceData.clockOut,
         status: attendanceData.status,
-        notes: attendanceData.notes
+        notes: attendanceData.notes,
+        password: attendanceData.password,
+        isHrOverride: canManage && isAttendanceHrOverride
       });
       showToast(res.data.message || 'Attendance logged successfully', 'success');
       setAttendanceModalOpen(false);
@@ -829,6 +845,60 @@ export const Employees = () => {
             </div>
 
             <form onSubmit={handleManualAttendanceSubmit} className="space-y-4">
+              {/* Anti-Proxy Password Security Shield Box */}
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2.5">
+                <div className="flex items-start gap-2">
+                  <ShieldCheck size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                      Anti-Proxy Security Protection (No Buddy-Punching)
+                    </h5>
+                    <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-relaxed mt-0.5">
+                      To prevent unauthorized or unfaithful attendance marking, please verify identity by entering the employee's personal account password.
+                    </p>
+                  </div>
+                </div>
+
+                {canManage && (
+                  <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={isAttendanceHrOverride}
+                        onChange={(e) => setIsAttendanceHrOverride(e.target.checked)}
+                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                      />
+                      <span>Authorized HR / Admin Override (Bypass employee password)</span>
+                    </label>
+                  </div>
+                )}
+
+                {(!canManage || !isAttendanceHrOverride) && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Employee Account Password <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showAttendancePassword ? 'text' : 'password'}
+                        required={!isAttendanceHrOverride}
+                        value={attendanceData.password}
+                        onChange={(e) => setAttendanceData({ ...attendanceData, password: e.target.value })}
+                        placeholder="Enter employee's personal password..."
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 pr-10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAttendancePassword(!showAttendancePassword)}
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      >
+                        {showAttendancePassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Attendance Date

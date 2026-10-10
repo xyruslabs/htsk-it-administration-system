@@ -1,5 +1,6 @@
 import prisma from '../utils/prisma.js';
 import { logAudit } from '../middleware/auth.js';
+import bcrypt from 'bcryptjs';
 
 // Helper to get formatted date string YYYY-MM-DD
 const getTodayStr = () => new Date().toISOString().split('T')[0];
@@ -38,7 +39,24 @@ export const getTodayAttendanceStatus = async (req, res) => {
 export const clockIn = async (req, res) => {
   try {
     const employeeId = req.body.employeeId || req.user.id;
+    const { password } = req.body;
     const today = getTodayStr();
+
+    const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    // If password is provided, verify against employee's confidential password
+    if (password && password.trim() !== '') {
+      const isPasswordValid = await bcrypt.compare(password, employee.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Security Verification Failed: Incorrect employee password. Proxy clock-in is prohibited.'
+        });
+      }
+    }
 
     // Check if single daily clock-in already exists
     const existing = await prisma.attendance.findUnique({
@@ -386,7 +404,7 @@ export const getLiveFloorMonitor = async (req, res) => {
 
 export const manualLogAttendance = async (req, res) => {
   try {
-    const { employeeId, date, clockIn, clockOut, status = 'PRESENT', notes } = req.body;
+    const { employeeId, date, clockIn, clockOut, status = 'PRESENT', notes, password, isHrOverride } = req.body;
     const targetEmployeeId = employeeId || req.user.id;
     const recordDate = date || getTodayStr();
 
@@ -398,15 +416,33 @@ export const manualLogAttendance = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Target employee not found.' });
     }
 
-    // Permission check: ADMIN, HR, or the employee themselves can record attendance
-    const isSelf = req.user.id === targetEmployeeId || req.user.email?.toLowerCase() === employee.email?.toLowerCase();
     const isHRorAdmin = ['ADMIN', 'HR'].includes(req.user.role);
 
-    if (!isHRorAdmin && !isSelf) {
-      return res.status(403).json({
-        success: false,
-        message: 'Security Violation: You do not have permission to log attendance for another employee.'
-      });
+    // ANTI-PROXY ATTENDANCE & BUDDY-PUNCHING DEFENSE:
+    // Every employee marking attendance for an account must authenticate with that employee's password.
+    // Only verified HR/Admin administrators can bypass using administrative override.
+    if (!isHRorAdmin || (isHRorAdmin && !isHrOverride && password)) {
+      if (!password || password.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: `Security Verification Required: Please enter ${employee.firstName}’s personal account password to authenticate attendance.`
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, employee.password);
+      if (!isPasswordValid) {
+        await logAudit(
+          req.user.id,
+          'PROXY_ATTENDANCE_BLOCKED',
+          'SECURITY',
+          `Unauthorized attendance attempt blocked for ${employee.firstName} ${employee.lastName} (${employee.employeeCode}). Invalid password entered.`,
+          req
+        );
+        return res.status(401).json({
+          success: false,
+          message: `Security Verification Failed: Incorrect password for ${employee.firstName} ${employee.lastName}. Unfaithful or proxy attendance marking is strictly prohibited.`
+        });
+      }
     }
 
     // Parse clockIn and clockOut
