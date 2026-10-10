@@ -188,9 +188,9 @@ export const Layout = ({ children }) => {
           badge: 'Pro'
         },
         {
-          label: 'Live Floor Monitor',
+          label: 'Add Attendance',
           path: '/floor-monitor',
-          icon: Activity,
+          icon: UserCheck,
           roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'],
           badge: 'Live'
         }
@@ -200,11 +200,10 @@ export const Layout = ({ children }) => {
       group: 'Workforce & Time',
       items: [
         {
-          label: 'Add / Mark Attendance',
+          label: 'My Time & Breaks',
           path: '/attendance',
           icon: Clock,
-          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'],
-          badge: 'Quick'
+          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE']
         },
         {
           label: 'Leave Management',
@@ -575,12 +574,12 @@ export const Layout = ({ children }) => {
             {/* Quick Add Attendance Navbar Button */}
             <button
               type="button"
-              onClick={handleOpenAddAttendance}
-              title="Add Attendance Record"
+              onClick={() => navigate('/floor-monitor')}
+              title="Add Attendance (Staff Floor Roster)"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
             >
               <PlusCircle size={15} />
-              <span className="hidden sm:inline">Add Attendance</span>
+              <span>Add Attendance</span>
             </button>
 
             {/* Theme Toggle Button */}
