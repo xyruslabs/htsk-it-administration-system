@@ -36,7 +36,10 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle,
-  UserCheck
+  UserCheck,
+  CheckCheck,
+  Trash2,
+  Inbox
 } from 'lucide-react';
 
 export const Layout = ({ children }) => {
@@ -190,32 +193,167 @@ export const Layout = ({ children }) => {
 
   const breadcrumb = getBreadcrumb();
 
-  const notifications = [
+  const defaultNotifications = [
     {
-      id: 1,
-      title: 'Leave Request Submitted',
-      desc: 'Elena Rostova requested 3 days Casual Leave',
-      time: '10 min ago',
+      id: 'notif-1',
+      title: 'Leave Request Pending Review',
+      desc: 'Elena Rostova submitted a 3-day Casual Leave request awaiting manager review.',
+      time: '12m ago',
       unread: true,
-      type: 'leave'
+      type: 'leave',
+      link: '/leaves',
+      badge: 'Action Required'
     },
     {
-      id: 2,
-      title: 'High Attendance Rate',
-      desc: 'Floor presence is currently above 92% today',
-      time: '45 min ago',
+      id: 'notif-2',
+      title: 'Workforce Attendance Milestone',
+      desc: 'Today’s floor attendance exceeded 92% active on-duty personnel.',
+      time: '45m ago',
       unread: true,
-      type: 'attendance'
+      type: 'attendance',
+      link: '/floor-monitor',
+      badge: 'Operational'
     },
     {
-      id: 3,
-      title: 'Biometric Terminals Synced',
-      desc: 'All regional terminal logs synchronized successfully',
-      time: '2 hours ago',
+      id: 'notif-3',
+      title: 'Biometric Gateway Synchronized',
+      desc: 'Regional edge attendance readers and time logs synced cleanly.',
+      time: '2h ago',
       unread: false,
-      type: 'system'
+      type: 'system',
+      link: '/audit-logs',
+      badge: 'Security'
+    },
+    {
+      id: 'notif-4',
+      title: 'Passcode Verification Policy Active',
+      desc: 'Anti-proxy attendance rules enforced: 3–5 character passcodes required.',
+      time: '4h ago',
+      unread: false,
+      type: 'security',
+      link: '/floor-monitor',
+      badge: 'Compliance'
     }
   ];
+
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('smarthr_notifications_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return defaultNotifications;
+  });
+
+  const [notificationFilter, setNotificationFilter] = useState('ALL');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('smarthr_notifications_v1', JSON.stringify(notifications));
+    } catch (e) {
+      // ignore
+    }
+  }, [notifications]);
+
+  useEffect(() => {
+    const fetchLiveAlerts = async () => {
+      if (!user) return;
+      try {
+        if (['ADMIN', 'HR', 'MANAGER'].includes(user.role)) {
+          const res = await api.get('/leaves?status=PENDING');
+          if (res.data?.success && Array.isArray(res.data.leaves) && res.data.leaves.length > 0) {
+            const pendingCount = res.data.leaves.length;
+            setNotifications((prev) => {
+              const exists = prev.some((n) => n.id === 'live-pending-leaves');
+              if (exists) return prev;
+              const liveNotif = {
+                id: 'live-pending-leaves',
+                title: `${pendingCount} Pending Leave Request${pendingCount > 1 ? 's' : ''}`,
+                desc: `${res.data.leaves[0].employee?.firstName || 'Staff member'} and others awaiting approval.`,
+                time: 'Just now',
+                unread: true,
+                type: 'leave',
+                link: '/leaves',
+                badge: 'Live Pending'
+              };
+              return [liveNotif, ...prev];
+            });
+          }
+        }
+      } catch (e) {
+        // Silently catch
+      }
+    };
+    fetchLiveAlerts();
+  }, [user]);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const handleMarkAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  };
+
+  const handleMarkAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
+    );
+  };
+
+  const handleDismissNotification = (e, id) => {
+    e.stopPropagation();
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleClearAllNotifications = () => {
+    setNotifications([]);
+  };
+
+  const handleResetSampleNotifications = () => {
+    setNotifications(defaultNotifications);
+  };
+
+  const handleNotificationClick = (item) => {
+    handleMarkAsRead(item.id);
+    setNotificationsOpen(false);
+    if (item.link) {
+      navigate(item.link);
+    }
+  };
+
+  const filteredNotifications = notificationFilter === 'UNREAD'
+    ? notifications.filter((n) => n.unread)
+    : notifications;
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'leave':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <CalendarDays size={15} />
+          </div>
+        );
+      case 'attendance':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <Activity size={15} />
+          </div>
+        );
+      case 'security':
+      case 'system':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <ShieldAlert size={15} />
+          </div>
+        );
+      default:
+        return (
+          <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <Bell size={15} />
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-800 dark:text-slate-100 flex flex-col md:flex-row antialiased transition-colors duration-200">
@@ -497,57 +635,182 @@ export const Layout = ({ children }) => {
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 transition cursor-pointer"
-                title="Notifications"
+                className={`relative p-2 rounded-xl border transition cursor-pointer ${
+                  notificationsOpen
+                    ? 'bg-slate-200 dark:bg-slate-700/80 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white'
+                    : 'bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300'
+                }`}
+                title="Notifications & System Alerts"
+                aria-label={`Notifications (${unreadCount} unread)`}
               >
                 <Bell size={16} />
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#0D1424]"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-[#0D1424] shadow-xs animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
-                  <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[85vh]">
+                  {/* Notification Header */}
+                  <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40">
                     <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Notifications</h4>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">2 unread system alerts</p>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">System Alerts</h4>
+                        {unreadCount > 0 && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                            {unreadCount} new
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {unreadCount > 0
+                          ? `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}`
+                          : 'All notifications caught up'}
+                      </p>
                     </div>
-                    <button
-                      onClick={() => setNotificationsOpen(false)}
-                      className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      Mark all read
-                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllRead}
+                          className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition cursor-pointer"
+                          title="Mark all as read"
+                        >
+                          <CheckCheck size={13} />
+                          <span>Mark all read</span>
+                        </button>
+                      )}
+                      {notifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearAllNotifications}
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-500/10 transition cursor-pointer"
+                          title="Clear all notifications"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800/60 max-h-72 overflow-y-auto">
-                    {notifications.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`p-3 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer ${
-                          item.unread ? 'bg-emerald-50/30 dark:bg-emerald-500/5' : ''
+
+                  {/* Filter Pills */}
+                  {notifications.length > 0 && (
+                    <div className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1.5 bg-slate-50/20 dark:bg-slate-900/20">
+                      <button
+                        type="button"
+                        onClick={() => setNotificationFilter('ALL')}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                          notificationFilter === 'ALL'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {item.title}
-                          </p>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-400 whitespace-nowrap">
-                            {item.time}
-                          </span>
+                        All ({notifications.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNotificationFilter('UNREAD')}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                          notificationFilter === 'UNREAD'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        Unread ({unreadCount})
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Notification List Body */}
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800/60 overflow-y-auto max-h-80 flex-1">
+                    {filteredNotifications.length === 0 ? (
+                      <div className="py-10 px-4 text-center">
+                        <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                          <Inbox size={18} />
                         </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{item.desc}</p>
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          {notificationFilter === 'UNREAD' ? 'No unread notifications' : 'No notifications'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          {notificationFilter === 'UNREAD'
+                            ? 'You have reviewed all incoming alerts.'
+                            : 'All system and workforce telemetries are up to date.'}
+                        </p>
+                        {notifications.length === 0 && (
+                          <button
+                            type="button"
+                            onClick={handleResetSampleNotifications}
+                            className="mt-3 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                          >
+                            Reset sample alerts
+                          </button>
+                        )}
                       </div>
-                    ))}
+                    ) : (
+                      filteredNotifications.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => handleNotificationClick(item)}
+                          className={`p-3 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer group relative flex gap-3 items-start ${
+                            item.unread ? 'bg-emerald-50/30 dark:bg-emerald-500/5' : ''
+                          }`}
+                        >
+                          {getNotificationIcon(item.type)}
+
+                          <div className="flex-1 min-w-0 pr-6">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              {item.badge && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded border bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-mono uppercase">
+                                  {item.badge}
+                                </span>
+                              )}
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                                {item.time}
+                              </span>
+                              {item.unread && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                              )}
+                            </div>
+                            <p className={`text-xs ${item.unread ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
+                              {item.title}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                              {item.desc}
+                            </p>
+                          </div>
+
+                          {/* Quick dismiss button */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleDismissNotification(e, item.id)}
+                            title="Dismiss notification"
+                            className="opacity-0 group-hover:opacity-100 absolute top-2.5 right-2.5 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
-                  <div className="p-2 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/50 dark:bg-slate-900/30">
+
+                  {/* Footer */}
+                  <div className="p-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30 text-[11px]">
                     <button
+                      type="button"
                       onClick={() => {
                         navigate('/audit-logs');
                         setNotificationsOpen(false);
                       }}
-                      className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer"
+                      className="font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer"
                     >
-                      View All Compliance Logs &rarr;
+                      Audit Trail Logs &rarr;
                     </button>
+                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                      TELEMETRY READY
+                    </span>
                   </div>
                 </div>
               )}
