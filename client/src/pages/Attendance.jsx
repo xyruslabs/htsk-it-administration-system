@@ -258,11 +258,11 @@ export const Attendance = () => {
               <h3 className="text-lg font-black text-slate-900 dark:text-white font-display tracking-tight flex items-center gap-2 mt-0.5">
                 <span>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'Select or Filter Your Name'}</span>
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {selectedEmployee
-                  ? `${selectedEmployee.designation || 'Specialist'} • ${selectedEmployee.department?.name || 'SmartHR Operations'}`
-                  : 'Universal terminal for recording shift clock-in and clock-out attendance.'}
-              </p>
+              {selectedEmployee && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {`${selectedEmployee.designation || 'Specialist'} • ${selectedEmployee.department?.name || 'SmartHR Operations'}`}
+                </p>
+              )}
             </div>
           </div>
 
@@ -385,18 +385,9 @@ export const Attendance = () => {
       <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                DAILY TIMEKEEPING ENGINE
-              </span>
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">Shift #01</span>
-            </div>
             <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Rapid Time & Break Session Tracker
+              Daily Attendance
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Guaranteed &lt;5s workflow with strict single-daily clock-in and concurrent break locks.
-            </p>
           </div>
 
           {/* Precision Digital Clock */}
@@ -527,13 +518,6 @@ export const Attendance = () => {
                   </span>
                 </div>
               </div>
-
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
-                <Coffee size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  Comfort & Meal breaks are tracked in the dedicated <strong>Break Time</strong> page with live progress dials, anti-proxy passcodes, and compliance monitors.
-                </span>
-              </div>
             </div>
 
             <div className="mt-4">
@@ -542,7 +526,7 @@ export const Attendance = () => {
                 className="w-full py-3 px-4 rounded-xl bg-[#286e1e] hover:bg-[#1e5816] text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-sm transition cursor-pointer"
               >
                 <Coffee size={14} />
-                <span>Open Break Time Management Hub →</span>
+                <span>Go to Break Time →</span>
               </Link>
             </div>
           </div>

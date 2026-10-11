@@ -393,53 +393,30 @@ export const BreakTime = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 font-mono">
-              BREAK MANAGEMENT SYSTEM · V7 ULTIMATE
-            </span>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">Shift #01</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <span>Break Time Tracker</span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-              Live Hub
-            </span>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            Break Time
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Comfort Break (20m limit) & Meal Break (1h limit) with anti-proxy passcode protection and live progress rings.
-          </p>
         </div>
 
-        {/* Precision Digital Clock & Quick Shift Link */}
-        <div className="flex items-center gap-3">
-          <Link
-            to="/attendance"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shadow-xs"
-            title="Go to Daily Clock-In / Attendance page"
-          >
-            <Clock size={13} />
-            <span>Mark Attendance</span>
-          </Link>
-
-          <div className="bg-white dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-2.5 flex items-center space-x-3 shadow-xs">
-            <Timer size={22} className="text-[#246e1d] dark:text-emerald-400 animate-pulse" />
-            <div>
-              <div className="text-xl font-mono font-bold text-slate-900 dark:text-white tracking-wider">
-                {currentTime.toLocaleTimeString('en-US', { hour12: false })}
-              </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                {currentTime.toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric'
-                })}
-              </div>
+        {/* Digital Clock */}
+        <div className="bg-white dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-2.5 flex items-center space-x-3 shadow-xs">
+          <Timer size={22} className="text-[#246e1d] dark:text-emerald-400 animate-pulse" />
+          <div>
+            <div className="text-xl font-mono font-bold text-slate-900 dark:text-white tracking-wider">
+              {currentTime.toLocaleTimeString('en-US', { hour12: false })}
+            </div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+              {currentTime.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+              })}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Workforce Break Overview Headline Cards (Referencing hr-break-time-tracking-v7-ultimate) */}
+      {/* Break Overview Headline Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
         <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between">
@@ -452,9 +429,6 @@ export const BreakTime = () => {
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">
             {totalOnBreakStaff}
-          </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Employees out right now
           </div>
         </div>
 
@@ -470,9 +444,6 @@ export const BreakTime = () => {
           <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-2">
             {categoryStats.comfortMins}m
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            {categoryStats.comfortStarts} session(s) today
-          </div>
         </div>
 
         <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
@@ -487,9 +458,6 @@ export const BreakTime = () => {
           <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">
             {categoryStats.mealMins}m
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            {categoryStats.mealStarts} session(s) today
-          </div>
         </div>
 
         <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
@@ -501,15 +469,12 @@ export const BreakTime = () => {
               <ShieldCheck size={15} />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">
+          <div className="text-2xl font-black mt-2">
             {categoryStats.comfortExceeded || categoryStats.mealExceeded ? (
-              <span className="text-rose-600 dark:text-rose-400">EXCEEDED</span>
+              <span className="text-rose-600 dark:text-rose-400 text-lg">EXCEEDED</span>
             ) : (
-              <span className="text-emerald-600 dark:text-emerald-400">100% OK</span>
+              <span className="text-emerald-600 dark:text-emerald-400 text-lg">WELL SATISFIED</span>
             )}
-          </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Strict policy adherence
           </div>
         </div>
       </div>
@@ -567,11 +532,11 @@ export const BreakTime = () => {
                   </span>
                 )}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {selectedEmployee
-                  ? `${selectedEmployee.designation || 'Specialist'} • ${selectedEmployee.department?.name || 'SmartHR Operations'}`
-                  : 'Filter by employee name or code to manage break sessions.'}
-              </p>
+              {selectedEmployee && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {`${selectedEmployee.designation || 'Specialist'} • ${selectedEmployee.department?.name || 'SmartHR Operations'}`}
+                </p>
+              )}
             </div>
           </div>
 
@@ -867,9 +832,6 @@ export const BreakTime = () => {
                     <h4 className="text-base font-bold text-slate-900 dark:text-white">
                       Comfort Break
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Short hydration, coffee/tea recharge & brief wellness pause.
-                    </p>
 
                     <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1.5 text-xs">
                       <div className="flex justify-between text-slate-600 dark:text-slate-400">
@@ -911,9 +873,6 @@ export const BreakTime = () => {
                     <h4 className="text-base font-bold text-slate-900 dark:text-white">
                       Meal Break
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Mid-shift lunch or dinner nourishment interval.
-                    </p>
 
                     <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1.5 text-xs">
                       <div className="flex justify-between text-slate-600 dark:text-slate-400">
@@ -939,14 +898,6 @@ export const BreakTime = () => {
                     <span>Start Meal Break (1h)</span>
                   </button>
                 </div>
-              </div>
-
-              {/* Anti-Proxy Security Note */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-400">
-                <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-                <span>
-                  Anti-proxy verification requires employee's 3–5 passcode for all break starts. Concurrent locks prevent dual active sessions.
-                </span>
               </div>
             </div>
           )}
@@ -1142,9 +1093,6 @@ export const BreakTime = () => {
                     <div className="font-bold text-xs text-slate-900 dark:text-white">
                       Comfort Break
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                      Short hydration, coffee/tea & brief wellness pause.
-                    </div>
                   </div>
 
                   {/* Meal Break: 1 Hour */}
@@ -1166,9 +1114,6 @@ export const BreakTime = () => {
                     </div>
                     <div className="font-bold text-xs text-slate-900 dark:text-white">
                       Meal Break
-                    </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                      Lunch or dinner nourishment interval (60 minutes).
                     </div>
                   </div>
                 </div>
@@ -1217,10 +1162,6 @@ export const BreakTime = () => {
                       {showBreakPasscode ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1">
-                    <ShieldCheck size={12} className="text-emerald-500" />
-                    Anti-proxy protection ensures breaks are recorded accurately.
-                  </p>
                 </div>
               )}
 

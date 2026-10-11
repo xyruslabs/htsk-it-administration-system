@@ -148,13 +148,6 @@ export const Layout = ({ children }) => {
       group: 'Security & Compliance',
       items: [
         {
-          label: 'HR Setup & Policies',
-          path: '/hr-setup',
-          icon: SlidersHorizontal,
-          roles: ['ADMIN', 'HR'],
-          badge: 'Setup'
-        },
-        {
           label: 'Audit & Compliance',
           path: '/audit-logs',
           icon: ShieldAlert,
