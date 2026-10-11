@@ -386,6 +386,7 @@ export const getLiveFloorMonitor = async (req, res) => {
 
       let floorStatus = 'ABSENT'; // ABSENT, ON_DUTY, ON_BREAK, ON_LEAVE, CLOCKED_OUT
       let activeBreakType = null;
+      let activeBreak = null;
 
       if (todayLeave) {
         floorStatus = 'ON_LEAVE';
@@ -394,7 +395,7 @@ export const getLiveFloorMonitor = async (req, res) => {
         if (todayAtt.clockOut) {
           floorStatus = 'CLOCKED_OUT';
         } else {
-          const activeBreak = todayAtt.breaks.find(b => !b.endTime);
+          activeBreak = todayAtt.breaks.find(b => !b.endTime) || null;
           if (activeBreak) {
             floorStatus = 'ON_BREAK';
             activeBreakType = activeBreak.type;
