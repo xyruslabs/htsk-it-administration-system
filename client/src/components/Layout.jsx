@@ -7,6 +7,7 @@ import api from '../api/axios';
 import {
   LayoutDashboard,
   Clock,
+  Coffee,
   CalendarDays,
   Users,
   ShieldAlert,
@@ -120,6 +121,13 @@ export const Layout = ({ children }) => {
           icon: Clock,
           roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'],
           badge: 'Quick'
+        },
+        {
+          label: 'Break Time',
+          path: '/break-time',
+          icon: Coffee,
+          roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'],
+          badge: '20m/1h'
         },
         {
           label: 'Leave Management',

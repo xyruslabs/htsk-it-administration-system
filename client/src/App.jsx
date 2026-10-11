@@ -11,6 +11,7 @@ import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { FloorMonitor } from './pages/FloorMonitor';
 import { Attendance } from './pages/Attendance';
+import { BreakTime } from './pages/BreakTime';
 import { LeaveManagement } from './pages/LeaveManagement';
 import { Employees } from './pages/Employees';
 import { AuditLogs } from './pages/AuditLogs';
@@ -64,6 +65,17 @@ export function App() {
               <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE']}>
                 <Layout>
                   <Attendance />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/break-time"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE']}>
+                <Layout>
+                  <BreakTime />
                 </Layout>
               </ProtectedRoute>
             }
