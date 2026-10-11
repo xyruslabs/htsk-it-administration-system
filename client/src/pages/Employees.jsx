@@ -61,7 +61,8 @@ export const Employees = () => {
     firstName: '',
     lastName: '',
     email: '',
-    password: '1234',
+    password: '',
+    confirmPassword: '',
     role: 'EMPLOYEE',
     designation: '',
     departmentId: '',
@@ -115,13 +116,18 @@ export const Employees = () => {
 
   const handleCreateEmployee = async (e) => {
     e.preventDefault();
-    if (formData.password && (formData.password.trim().length < 3 || formData.password.trim().length > 5)) {
+    if (!formData.password || formData.password.trim().length < 3 || formData.password.trim().length > 5) {
       showToast('Passcode must be between 3 and 5 characters or digits.', 'error');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      showToast('New Password and Confirm Password do not match.', 'error');
       return;
     }
     try {
       setActionLoading(true);
-      const res = await api.post('/employees', formData);
+      const { confirmPassword, ...payload } = formData;
+      const res = await api.post('/employees', payload);
       showToast(res.data.message, 'success');
       setModalOpen(false);
       setFormData({
@@ -129,7 +135,8 @@ export const Employees = () => {
         firstName: '',
         lastName: '',
         email: '',
-        password: '1234',
+        password: '',
+        confirmPassword: '',
         role: 'EMPLOYEE',
         designation: '',
         departmentId: '',
@@ -329,20 +336,22 @@ export const Employees = () => {
           </p>
         </div>
 
-        {/* Register Employee Button - Accessible to all staff */}
-        <button
-          onClick={() => {
-            setFormData({
-              ...formData,
-              employeeCode: `SHR-${100 + employees.length + 1}`
-            });
-            setModalOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer self-start sm:self-auto"
-        >
-          <UserPlus size={15} />
-          <span>+ Register New Employee</span>
-        </button>
+        {/* Register Employee Button - HR/Admin only */}
+        {canManage && (
+          <button
+            onClick={() => {
+              setFormData({
+                ...formData,
+                employeeCode: `SHR-${100 + employees.length + 1}`
+              });
+              setModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer self-start sm:self-auto"
+          >
+            <UserPlus size={15} />
+            <span>+ Register New Employee</span>
+          </button>
+        )}
       </div>
 
       {/* Status Tab Switcher: Registered vs Pending HR Approval */}
@@ -729,23 +738,37 @@ export const Employees = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Passcode (3–5 Characters)
-                </label>
-                <input
-                  type="password"
-                  required
-                  minLength={3}
-                  maxLength={5}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="3–5 characters or digits (e.g. 1234)"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                />
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Employee's security passcode for login and attendance verification.
-                </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={3}
+                    maxLength={5}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="3–5 characters"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={3}
+                    maxLength={5}
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    placeholder="Repeat password"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
@@ -826,11 +849,12 @@ export const Employees = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Department</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Department {!canManage && <span className="text-slate-400 font-normal">(HR only)</span>}</label>
                 <select
                   value={editData.departmentId}
+                  disabled={!canManage}
                   onChange={(e) => setEditData({ ...editData, departmentId: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Unassigned</option>
                   {departments.map((d) => (

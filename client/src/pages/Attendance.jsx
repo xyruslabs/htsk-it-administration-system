@@ -466,6 +466,31 @@ export const Attendance = () => {
         </div>
       )}
 
+      {/* Hero Header: Mark Your Attendance */}
+      <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Mark Your Attendance In Here
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Select your name below, then tap <strong>Mark Attendance</strong> to verify and record.
+            </p>
+          </div>
+          {/* Shift Pill Display — assigned by HR, read-only */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#D2FD41] text-[#0A0E1A] font-black text-sm shadow-sm border border-[#b8e53a] select-none">
+              <Timer size={16} />
+              <span>7.30 A.M. – 7.30 P.M.</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 text-white font-black text-sm shadow-sm border border-slate-700 select-none">
+              <Timer size={16} />
+              <span>8.00 A.M. – 8.00 P.M.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Universal Employee Kiosk Identity Selector */}
       <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs transition-colors relative" ref={selectorRef}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -627,8 +652,8 @@ export const Attendance = () => {
       <div className="bg-white dark:bg-[#0D1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Daily Attendance
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Attendance Terminal
             </h2>
           </div>
 
