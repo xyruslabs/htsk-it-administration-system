@@ -550,6 +550,7 @@ export const Attendance = () => {
               />
               {employeeSearch && (
                 <button
+                  type="button"
                   onClick={() => {
                     setEmployeeSearch('');
                     setIsSelectorOpen(false);
@@ -629,6 +630,7 @@ export const Attendance = () => {
             return (
               <button
                 key={emp.id}
+                type="button"
                 onClick={() => {
                   setSelectedEmployee(emp);
                   sessionStorage.setItem('smarthr_selected_kiosk_emp', emp.id);
@@ -736,6 +738,7 @@ export const Attendance = () => {
                 </button>
               ) : !hasClockedOut ? (
                 <button
+                  type="button"
                   onClick={handleClockOut}
                   disabled={actionLoading || !!activeBreak}
                   className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-sm transition cursor-pointer disabled:opacity-50"
@@ -903,6 +906,7 @@ export const Attendance = () => {
             {['ALL', 'ON_DUTY', 'ON_BREAK', 'ON_LEAVE', 'ABSENT'].map((filterKey) => (
               <button
                 key={filterKey}
+                type="button"
                 onClick={() => setRosterFilter(filterKey)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   rosterFilter === filterKey
@@ -1003,6 +1007,7 @@ export const Attendance = () => {
 
                     <td className="py-3 px-5 text-right">
                       <button
+                        type="button"
                         onClick={() => handleOpenAddAttendanceModal(item)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
                         title={`Record attendance for ${item.name}`}
