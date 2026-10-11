@@ -20,7 +20,7 @@ router.get('/', getAllEmployees);
 router.get('/departments', getDepartments);
 router.get('/:id', getEmployeeById);
 
-// Employee registration & profile update (accessible to all authenticated staff)
+// Universal employee self-registration & passcode-verified profile updates (all authenticated staff)
 router.post('/', createEmployee);
 router.put('/:id', updateEmployee);
 

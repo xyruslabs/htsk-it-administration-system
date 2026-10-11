@@ -103,7 +103,14 @@ export const Employees = () => {
 
   const showToast = (text, type = 'success') => {
     setMessage({ text, type });
-    setTimeout(() => setMessage({ text: '', type: '' }), 4000);
+    setTimeout(() => setMessage({ text: '', type: '' }), 6000);
+  };
+
+  const formatApiError = (err, defaultMsg = 'Action failed') => {
+    if (err.response?.status === 403) {
+      return `HR Admin Access Required: Role '${user?.role || 'EMPLOYEE'}' lacks administrative privileges. Please log in as HR Manager (hr@smarthr.io) or Super Admin (admin@smarthr.io) to manage or approve staff.`;
+    }
+    return err.response?.data?.message || defaultMsg;
   };
 
   const handleCreateEmployee = async (e) => {
@@ -130,7 +137,7 @@ export const Employees = () => {
       });
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Error registering employee', 'error');
+      showToast(formatApiError(err, 'Error registering employee'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -211,7 +218,7 @@ export const Employees = () => {
       setAttendanceModalOpen(false);
       setSelectedAttendanceEmp(null);
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to record manual attendance', 'error');
+      showToast(formatApiError(err, 'Failed to record manual attendance'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -235,7 +242,7 @@ export const Employees = () => {
       setEditingEmployee(null);
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to update employee details', 'error');
+      showToast(formatApiError(err, 'Failed to update employee details'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -248,7 +255,7 @@ export const Employees = () => {
       showToast(res.data.message || `Approved ${empName}`, 'success');
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to approve employee', 'error');
+      showToast(formatApiError(err, 'Failed to approve employee'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -261,7 +268,7 @@ export const Employees = () => {
       showToast(res.data.message || `Rejected registration for ${empName}`, 'success');
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to reject employee', 'error');
+      showToast(formatApiError(err, 'Failed to reject employee'), 'error');
     } finally {
       setActionLoading(false);
     }
