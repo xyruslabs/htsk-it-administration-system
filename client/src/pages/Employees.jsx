@@ -204,7 +204,7 @@ export const Employees = () => {
 
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/manual', {
+      const payload = {
         employeeId: selectedAttendanceEmp.id,
         date: attendanceData.date,
         clockIn: attendanceData.clockIn,
@@ -213,7 +213,19 @@ export const Employees = () => {
         notes: attendanceData.notes,
         password: attendanceData.password,
         isHrOverride: canManage && isAttendanceHrOverride
-      });
+      };
+
+      let res;
+      try {
+        res = await api.post('/attendance/manual', payload);
+      } catch (postErr) {
+        if (postErr.response?.status === 404) {
+          res = await api.post('/attendance/record', payload);
+        } else {
+          throw postErr;
+        }
+      }
+
       showToast(res.data.message || 'Attendance logged successfully', 'success');
       setAttendanceModalOpen(false);
       setSelectedAttendanceEmp(null);

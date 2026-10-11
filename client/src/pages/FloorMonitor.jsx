@@ -189,7 +189,7 @@ export const FloorMonitor = () => {
 
     try {
       setActionLoading(true);
-      const res = await api.post('/attendance/manual', {
+      const payload = {
         employeeId: targetEmpId,
         date: formData.date,
         clockIn: formData.clockIn,
@@ -198,13 +198,26 @@ export const FloorMonitor = () => {
         notes: formData.notes || `Manual entry recorded by ${user?.name || user?.email}`,
         password: formData.password,
         isHrOverride: isHRorAdmin && isHrOverride
-      });
+      };
+
+      let res;
+      try {
+        res = await api.post('/attendance/manual', payload);
+      } catch (postErr) {
+        if (postErr.response?.status === 404) {
+          res = await api.post('/attendance/record', payload);
+        } else {
+          throw postErr;
+        }
+      }
 
       showToast(res.data.message || 'Attendance verified and recorded successfully!', 'success');
       setAttendanceModalOpen(false);
       fetchFloorStatus();
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to record attendance';
+      const msg = err.response?.status === 404
+        ? 'Attendance endpoint not found on server. Please restart the backend server or run run-smarthr.bat to apply updated routes.'
+        : (err.response?.data?.message || 'Failed to record attendance');
       setModalError(msg);
       showToast(msg, 'error');
     } finally {

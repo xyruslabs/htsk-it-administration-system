@@ -20,6 +20,8 @@ router.get('/today', getTodayAttendanceStatus);
 router.post('/clock-in', clockIn);
 router.post('/clock-out', clockOut);
 router.post('/manual', manualLogAttendance);
+router.post('/record', manualLogAttendance);
+router.post('/add', manualLogAttendance);
 router.post('/break/start', startBreak);
 router.post('/break/end', endBreak);
 
