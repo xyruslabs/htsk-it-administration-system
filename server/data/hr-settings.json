@@ -1,0 +1,38 @@
+{
+  "company": {
+    "name": "SmartHR Enterprise Corporation",
+    "standardWorkingHours": 8.5,
+    "workDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "timezone": "Asia/Colombo (UTC+05:30)",
+    "currency": "USD ($)"
+  },
+  "shiftPolicy": {
+    "shiftName": "General Day Shift",
+    "startTime": "09:00",
+    "endTime": "17:30",
+    "lateEntryGracePeriodMins": 15,
+    "earlyExitGracePeriodMins": 15,
+    "halfDayThresholdHours": 4.5,
+    "absentThresholdHours": 2.5,
+    "rosterColor": "#10b981",
+    "allowOvertime": true
+  },
+  "breakPolicy": {
+    "comfortBreakMins": 20,
+    "mealBreakMins": 60,
+    "antiProxyPasscodeEnabled": true,
+    "minPasscodeLength": 3,
+    "maxPasscodeLength": 5,
+    "concurrentBreakLock": true
+  },
+  "leavePolicy": {
+    "annualLeaveQuota": 14,
+    "medicalLeaveQuota": 14,
+    "casualLeaveQuota": 7,
+    "allowCarryForward": true,
+    "antiSelfApproval": true,
+    "restrictBackdatedLeaves": true
+  },
+  "lastUpdated": "2026-10-11T12:00:00.000Z",
+  "updatedBy": "Admin System"
+}
