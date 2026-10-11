@@ -19,7 +19,9 @@ import {
   AlertCircle,
   Shield,
   ShieldCheck,
-  X
+  X,
+  Timer,
+  Utensils
 } from 'lucide-react';
 
 export const FloorMonitor = () => {
@@ -38,6 +40,24 @@ export const FloorMonitor = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState({ text: '', type: '' });
   const [modalError, setModalError] = useState('');
+
+  // Break modal states
+  const [breakModalOpen, setBreakModalOpen] = useState(false);
+  const [breakStaff, setBreakStaff] = useState(null);
+  const [breakType, setBreakType] = useState('COMFORT'); // 'COMFORT' (20m) | 'MEAL' (1h)
+  const [breakPasscode, setBreakPasscode] = useState('');
+  const [showBreakPasscode, setShowBreakPasscode] = useState(false);
+  const [isHrBreakOverride, setIsHrBreakOverride] = useState(false);
+
+  // Active Break Viewer modal state (matching reference image)
+  const [activeBreakViewerOpen, setActiveBreakViewerOpen] = useState(false);
+  const [activeViewerStaff, setActiveViewerStaff] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [formData, setFormData] = useState({
     employeeId: '',
@@ -190,6 +210,122 @@ export const FloorMonitor = () => {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleEmployeeRowClick = (item) => {
+    if (item.floorStatus === 'ON_BREAK') {
+      setActiveViewerStaff(item);
+      setActiveBreakViewerOpen(true);
+    } else if (item.floorStatus === 'ON_DUTY') {
+      setBreakStaff(item);
+      setBreakType('COMFORT');
+      setBreakPasscode('');
+      setShowBreakPasscode(false);
+      setIsHrBreakOverride(false);
+      setBreakModalOpen(true);
+    } else {
+      handleOpenAddAttendance(item);
+    }
+  };
+
+  const handleStartBreakSubmit = async (e) => {
+    e.preventDefault();
+    if (!breakStaff) return;
+    const isHRorAdmin = ['ADMIN', 'HR'].includes(user?.role);
+    if (!isHRorAdmin || !isHrBreakOverride) {
+      const trimmed = breakPasscode.trim();
+      if (trimmed.length < 3 || trimmed.length > 5) {
+        showToast('Passcode must be between 3 and 5 characters.', 'error');
+        return;
+      }
+    }
+    try {
+      setActionLoading(true);
+      let res;
+      try {
+        res = await api.post('/attendance/break/start', {
+          type: breakType,
+          employeeId: breakStaff.id,
+          password: breakPasscode.trim()
+        });
+      } catch (err) {
+        const fallback = breakType === 'COMFORT' ? 'TEA' : 'LUNCH';
+        if (err.response?.status === 400 && err.response?.data?.message?.includes('Invalid break type')) {
+          res = await api.post('/attendance/break/start', {
+            type: fallback,
+            employeeId: breakStaff.id,
+            password: breakPasscode.trim()
+          });
+        } else {
+          throw err;
+        }
+      }
+      showToast(
+        `${breakType === 'COMFORT' ? 'Comfort Break (20 min)' : 'Meal Break (1 hour)'} started for ${breakStaff.name}!`,
+        'success'
+      );
+      setBreakModalOpen(false);
+      setBreakPasscode('');
+      fetchFloorStatus();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to start break session.', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEndBreakForViewer = async (staffId, staffName) => {
+    try {
+      setActionLoading(true);
+      const res = await api.post('/attendance/break/end', { employeeId: staffId });
+      showToast(`${res.data.message} (${staffName})`, 'success');
+      setActiveBreakViewerOpen(false);
+      fetchFloorStatus();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to end break session.', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getViewerBreakDetails = (staff) => {
+    if (!staff) return null;
+    const isMeal = staff.activeBreakType === 'MEAL' || staff.activeBreakType === 'LUNCH';
+    const targetMins = isMeal ? 60 : 20;
+    const startMs = staff.activeBreakStartTime ? new Date(staff.activeBreakStartTime).getTime() : currentTime.getTime() - 240000;
+    const elapsedSecs = Math.max(0, Math.floor((currentTime.getTime() - startMs) / 1000));
+    const elapsedMins = Math.floor(elapsedSecs / 60);
+    const targetSecs = targetMins * 60;
+    const percent = Math.min(100, Math.max(0, (elapsedSecs / targetSecs) * 100));
+
+    const circumference = 427.25;
+    const strokeDashoffset = circumference - (circumference * percent) / 100;
+    const targetEndTime = new Date(startMs + targetMins * 60 * 1000);
+    const isOverdue = elapsedMins > targetMins;
+
+    const displayName = isMeal
+      ? 'Meal Break'
+      : (staff.activeBreakType === 'COFFEE' ? 'Coffee Break' : 'Comfort Break');
+
+    const formattedTargetTime = targetEndTime.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    return {
+      isMeal,
+      targetMins,
+      elapsedSecs,
+      elapsedMins,
+      percent,
+      circumference,
+      strokeDashoffset,
+      targetEndTime,
+      formattedTargetTime,
+      isOverdue,
+      displayName
+    };
   };
 
   return (
@@ -360,13 +496,36 @@ export const FloorMonitor = () => {
               ) : (
                 filteredRoster.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-5">
+                    <td
+                      className="py-3 px-5 cursor-pointer group select-none"
+                      onClick={() => handleEmployeeRowClick(item)}
+                      title={
+                        item.floorStatus === 'ON_BREAK'
+                          ? `Click to view active break timer for ${item.name}`
+                          : item.floorStatus === 'ON_DUTY'
+                          ? `Click to start Comfort (20m) or Meal (1h) break for ${item.name}`
+                          : `Click to record shift attendance for ${item.name}`
+                      }
+                    >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center font-bold text-xs">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform">
                           {item.name[0]}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 dark:text-white">{item.name}</div>
+                          <div className="font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-[#D2FD41] transition-colors flex items-center gap-1.5">
+                            <span>{item.name}</span>
+                            {item.floorStatus === 'ON_BREAK' ? (
+                              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 font-medium flex items-center gap-0.5 animate-pulse">
+                                <Timer size={9} />
+                                Active Break
+                              </span>
+                            ) : item.floorStatus === 'ON_DUTY' ? (
+                              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-medium flex items-center gap-0.5">
+                                <Coffee size={9} />
+                                Take Break
+                              </span>
+                            ) : null}
+                          </div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <span className="font-mono text-[10px]">{item.employeeCode}</span>
                             <span>•</span>
@@ -633,6 +792,302 @@ export const FloorMonitor = () => {
           </div>
         </div>
       )}
+
+      {/* Break Selection Modal (Anti-Proxy / HR Override) */}
+      {breakModalOpen && breakStaff && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                  {breakType === 'MEAL' ? <Utensils size={20} /> : <Coffee size={20} />}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Select Break Session
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {breakStaff.name} ({breakStaff.employeeCode} · {breakStaff.department})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBreakModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleStartBreakSubmit} className="space-y-4">
+              {/* Break Type Options */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Choose Break Category:
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Comfort Break: 20 Minutes */}
+                  <div
+                    onClick={() => setBreakType('COMFORT')}
+                    className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                      breakType === 'COMFORT'
+                        ? 'border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/20 dark:border-emerald-500 ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                        <Coffee size={16} />
+                      </div>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">
+                        20 MINS
+                      </span>
+                    </div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">
+                      Comfort Break
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                      Short hydration, coffee/tea & brief wellness pause.
+                    </div>
+                  </div>
+
+                  {/* Meal Break: 1 Hour */}
+                  <div
+                    onClick={() => setBreakType('MEAL')}
+                    className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                      breakType === 'MEAL'
+                        ? 'border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/20 dark:border-emerald-500 ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <Utensils size={16} />
+                      </div>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">
+                        1 HOUR
+                      </span>
+                    </div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">
+                      Meal Break
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                      Lunch or dinner nourishment interval (60 minutes).
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Passcode or HR Override */}
+              {['ADMIN', 'HR'].includes(user?.role) && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-emerald-500" />
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      Supervisor / HR Override
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isHrBreakOverride}
+                    onChange={(e) => setIsHrBreakOverride(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-600 cursor-pointer"
+                  />
+                </div>
+              )}
+
+              {(!isHrBreakOverride || !['ADMIN', 'HR'].includes(user?.role)) && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Employee Passcode (3–5 Characters)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showBreakPasscode ? 'text' : 'password'}
+                      required={!isHrBreakOverride}
+                      minLength={3}
+                      maxLength={5}
+                      autoFocus
+                      value={breakPasscode}
+                      onChange={(e) => setBreakPasscode(e.target.value)}
+                      placeholder="Enter employee passcode (e.g. 1234)"
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowBreakPasscode(!showBreakPasscode)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      {showBreakPasscode ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1">
+                    <ShieldCheck size={12} className="text-emerald-500" />
+                    Anti-proxy protection ensures breaks are recorded accurately.
+                  </p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setBreakModalOpen(false)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading || (!isHrBreakOverride && breakPasscode.trim().length < 3)}
+                  className="px-4 py-2 rounded-xl bg-[#286e1e] hover:bg-[#1e5816] text-white text-xs font-semibold shadow-sm transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {breakType === 'MEAL' ? <Utensils size={13} /> : <Coffee size={13} />}
+                  <span>
+                    {actionLoading
+                      ? 'Starting Break...'
+                      : `Start ${breakType === 'COMFORT' ? 'Comfort Break (20m)' : 'Meal Break (1h)'}`}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Active Break Viewer Modal - Matches Reference Image */}
+      {activeBreakViewerOpen && activeViewerStaff && (() => {
+        const details = getViewerBreakDetails(activeViewerStaff);
+        if (!details) return null;
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Timer className="w-5 h-5 text-[#246e1d] dark:text-emerald-400" />
+                  <span className="text-base font-bold text-[#246e1d] dark:text-emerald-400 font-sans tracking-tight">
+                    My Time
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveBreakViewerOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Centered Body */}
+              <div className="py-2 flex flex-col items-center justify-center">
+                <div className="text-center mb-1">
+                  <h4 className="text-base font-bold text-slate-800 dark:text-slate-100">
+                    {details.displayName}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {activeViewerStaff.name} ({activeViewerStaff.employeeCode})
+                  </p>
+                </div>
+
+                {/* Circular Radial Progress Ring */}
+                <div className="relative w-44 h-44 flex items-center justify-center my-3">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+                    {/* Background Track */}
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="68"
+                      stroke="#d3ccc6"
+                      strokeWidth="6"
+                      fill="transparent"
+                      className="dark:stroke-slate-700"
+                    />
+                    {/* Progress Arc */}
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="68"
+                      stroke="#2b7b1d"
+                      strokeWidth="6"
+                      strokeDasharray={427.25}
+                      strokeDashoffset={details.strokeDashoffset}
+                      strokeLinecap="round"
+                      fill="transparent"
+                      className="transition-all duration-1000 ease-linear dark:stroke-emerald-400"
+                    />
+                  </svg>
+
+                  {/* Centered Break Icon */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {details.isMeal ? (
+                      <Utensils size={46} className="text-[#2b7b1d] dark:text-emerald-400" />
+                    ) : (
+                      <Coffee size={46} className="text-[#2b7b1d] fill-[#2b7b1d] dark:text-emerald-400 dark:fill-emerald-400" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Big Bold Elapsed Time */}
+                <div className="text-center">
+                  <div className="text-3xl font-extrabold font-serif text-[#216a1b] dark:text-emerald-400 tracking-tight">
+                    {details.elapsedMins} min
+                  </div>
+                  <div className="text-xs font-semibold text-[#216a1b] dark:text-emerald-400 mt-1">
+                    {details.isOverdue ? (
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">
+                        Target ended at {details.formattedTargetTime} (+{details.elapsedMins - details.targetMins}m over)
+                      </span>
+                    ) : (
+                      <span>Break ends at {details.formattedTargetTime}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Prominent Green End Break Button */}
+                <button
+                  type="button"
+                  onClick={() => handleEndBreakForViewer(activeViewerStaff.id, activeViewerStaff.name)}
+                  disabled={actionLoading}
+                  className="mt-6 w-full py-3.5 px-6 rounded-full bg-[#286e1e] hover:bg-[#1e5816] text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <span className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 bg-white rounded-xs"></span>
+                  </span>
+                  <span>End Break</span>
+                </button>
+              </div>
+
+              {/* Footer Stats */}
+              <div className="pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                <div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Total Breaks</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-xs mt-0.5">
+                    {activeViewerStaff.totalBreakMins}m
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Net Work</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-xs mt-0.5">
+                    {activeViewerStaff.totalWorkMins}m
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveBreakViewerOpen(false)}
+                  className="px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
