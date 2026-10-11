@@ -33,12 +33,23 @@ export const login = async (req, res) => {
     }
 
     let isMatch = await bcrypt.compare(password, employee.password);
-    if (!isMatch && ['1234', '123', '12345'].includes(password)) {
-      const isLegacy = await bcrypt.compare('password123', employee.password);
-      if (isLegacy) {
-        isMatch = true;
-        const newHash = await bcrypt.hash(password, 10);
-        await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
+    
+    // Support interchangeability between original default 'password123' and 3-5 character passcodes ('123', '1234')
+    if (!isMatch) {
+      if (password === 'password123') {
+        const matchesShortPasscode = await bcrypt.compare('123', employee.password) ||
+                                     await bcrypt.compare('1234', employee.password) ||
+                                     await bcrypt.compare('12345', employee.password);
+        if (matchesShortPasscode) {
+          isMatch = true;
+        }
+      } else if (['1234', '123', '12345'].includes(password)) {
+        const isLegacy = await bcrypt.compare('password123', employee.password);
+        if (isLegacy) {
+          isMatch = true;
+          const newHash = await bcrypt.hash(password, 10);
+          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
+        }
       }
     }
 
