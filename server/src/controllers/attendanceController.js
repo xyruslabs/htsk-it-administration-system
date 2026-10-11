@@ -62,8 +62,6 @@ export const clockIn = async (req, res) => {
         const isLegacyDefault = await bcrypt.compare('password123', employee.password);
         if (isLegacyDefault) {
           isPasswordValid = true;
-          const newHash = await bcrypt.hash(trimmed, 10);
-          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
         }
       }
 
@@ -483,8 +481,6 @@ export const manualLogAttendance = async (req, res) => {
         const isLegacyDefault = await bcrypt.compare('password123', employee.password);
         if (isLegacyDefault) {
           isPasswordValid = true;
-          const newHash = await bcrypt.hash(trimmed, 10);
-          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
         }
       }
 

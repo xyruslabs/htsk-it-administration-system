@@ -47,8 +47,6 @@ export const login = async (req, res) => {
         const isLegacy = await bcrypt.compare('password123', employee.password);
         if (isLegacy) {
           isMatch = true;
-          const newHash = await bcrypt.hash(password, 10);
-          await prisma.employee.update({ where: { id: employee.id }, data: { password: newHash } });
         }
       }
     }
