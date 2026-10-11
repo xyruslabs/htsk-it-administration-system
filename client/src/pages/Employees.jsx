@@ -55,18 +55,56 @@ export const Employees = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
+  const [formTab, setFormTab] = useState('overview');
+
   // Create Form State
   const [formData, setFormData] = useState({
     employeeCode: '',
     firstName: '',
+    middleName: '',
     lastName: '',
+    salutation: 'Mr',
+    gender: 'Male',
+    dateOfBirth: '1995-05-15',
+    dateOfJoining: new Date().toISOString().split('T')[0],
+    status: 'ACTIVE',
     email: '',
+    createAccountAutomatically: true,
     password: '',
     confirmPassword: '',
     role: 'EMPLOYEE',
     designation: '',
     departmentId: '',
-    phone: ''
+    company: 'akoma',
+    branch: 'Main Headquarters',
+    managerId: '',
+    grade: 'L4',
+    employmentType: 'Full-time',
+    phone: '',
+    preferredContactEmail: 'Company Email',
+    personalEmail: '',
+    address: '',
+    emergencyContactName: '',
+    emergencyPhone: '',
+    emergencyRelation: '',
+    attendanceDeviceId: '',
+    defaultShift: 'Standard Day Shift (08:00 - 17:00)',
+    expenseApprover: 'Finance Department',
+    shiftRequestApprover: 'Assigned Line Manager',
+    leaveApprover: 'Direct Line Manager & HR',
+    baseSalary: '4500.00',
+    payrollCostCenter: 'Corporate HQ',
+    salaryCurrency: 'USD',
+    salaryMode: 'Bank Transfer',
+    advanceAccount: '',
+    maritalStatus: 'Single',
+    bloodGroup: 'O+',
+    familyBackground: '',
+    healthDetails: '',
+    passportNumber: '',
+    passportDateOfIssue: '',
+    passportValidUpTo: '',
+    passportPlaceOfIssue: ''
   });
 
   // Edit Form State
@@ -133,14 +171,50 @@ export const Employees = () => {
       setFormData({
         employeeCode: '',
         firstName: '',
+        middleName: '',
         lastName: '',
+        salutation: 'Mr',
+        gender: 'Male',
+        dateOfBirth: '1995-05-15',
+        dateOfJoining: new Date().toISOString().split('T')[0],
+        status: 'ACTIVE',
         email: '',
+        createAccountAutomatically: true,
         password: '',
         confirmPassword: '',
         role: 'EMPLOYEE',
         designation: '',
         departmentId: '',
-        phone: ''
+        company: 'akoma',
+        branch: 'Main Headquarters',
+        managerId: '',
+        grade: 'L4',
+        employmentType: 'Full-time',
+        phone: '',
+        preferredContactEmail: 'Company Email',
+        personalEmail: '',
+        address: '',
+        emergencyContactName: '',
+        emergencyPhone: '',
+        emergencyRelation: '',
+        attendanceDeviceId: '',
+        defaultShift: 'Standard Day Shift (08:00 - 17:00)',
+        expenseApprover: 'Finance Department',
+        shiftRequestApprover: 'Assigned Line Manager',
+        leaveApprover: 'Direct Line Manager & HR',
+        baseSalary: '4500.00',
+        payrollCostCenter: 'Corporate HQ',
+        salaryCurrency: 'USD',
+        salaryMode: 'Bank Transfer',
+        advanceAccount: '',
+        maritalStatus: 'Single',
+        bloodGroup: 'O+',
+        familyBackground: '',
+        healthDetails: '',
+        passportNumber: '',
+        passportDateOfIssue: '',
+        passportValidUpTo: '',
+        passportPlaceOfIssue: ''
       });
       fetchData();
     } catch (err) {
@@ -595,25 +669,28 @@ export const Employees = () => {
         )}
       </div>
 
-      {/* Register New Employee Modal */}
+      {/* Register New Employee Modal — Comprehensive Enterprise HR Suite */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Register New Employee</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {canManage
-                    ? 'Initializes employee record and activates attendance profile.'
-                    : 'Submits registration request for HR authorization.'}
-                </p>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+          <div className="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            {/* Top Header matching ERP design */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Employee /</span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">New Employee</h3>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                  Not Saved
+                </span>
               </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {!canManage && (
@@ -625,153 +702,757 @@ export const Employees = () => {
               </div>
             )}
 
-            <form onSubmit={handleCreateEmployee} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Employee Code
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.employeeCode}
-                    onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    System Role
-                  </label>
-                  <select
-                    value={formData.role}
-                    disabled={!canManage}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+            <form onSubmit={handleCreateEmployee} className="space-y-5">
+              {/* Form Navigation Tabs */}
+              <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold overflow-x-auto pb-2">
+                {[
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'address', label: 'Address & Contacts' },
+                  { id: 'attendance', label: 'Attendance & Leaves' },
+                  { id: 'salary', label: 'Salary' },
+                  { id: 'personal', label: 'Personal Details' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setFormTab(tab.id)}
+                    className={`pb-1 whitespace-nowrap transition cursor-pointer ${
+                      formTab === tab.id
+                        ? 'border-b-2 border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
                   >
-                    <option value="EMPLOYEE">Employee</option>
-                    {canManage && (
-                      <>
-                        <option value="MANAGER">Team Lead / Manager</option>
-                        <option value="HR">HR Specialist</option>
-                        <option value="ADMIN">Super Admin</option>
-                      </>
-                    )}
-                  </select>
-                </div>
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">First Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
+              {/* TAB 1: OVERVIEW */}
+              {formTab === 'overview' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Series <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.employeeCode}
+                        onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
+                        placeholder="HR-EMP-001"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Gender <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        value={formData.gender}
+                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Date of Joining <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.dateOfJoining}
+                        onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Work Email</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="employee@smarthr.io"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        First Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        placeholder="e.g. Elena"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Date of Birth <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.dateOfBirth}
+                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Status <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="ACTIVE">Active</option>
+                        <option value="PENDING_APPROVAL">Pending Approval</option>
+                        <option value="SUSPENDED">Suspended</option>
+                      </select>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Designation</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.designation}
-                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    placeholder="e.g. Senior Frontend Engineer"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Department</label>
-                  <select
-                    value={formData.departmentId}
-                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="">Unassigned</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} ({d.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Middle Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.middleName}
+                        onChange={(e) => setFormData({ ...formData, middleName: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Salutation
+                      </label>
+                      <select
+                        value={formData.salutation}
+                        onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Mr">Mr</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Dr">Dr</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Last Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        placeholder="e.g. Vance"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Contact Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+1 (555) 019-2834"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+                  {/* User Details Section */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2">User Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          User ID / Login Email <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="vance@akoma.io"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          System User (login) ID. If set, it will become default for all HR forms.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 pt-2">
+                        <input
+                          type="checkbox"
+                          id="autoUser"
+                          checked={formData.createAccountAutomatically}
+                          onChange={(e) => setFormData({ ...formData, createAccountAutomatically: e.target.checked })}
+                          className="rounded border-slate-300 text-emerald-600 focus:ring-0 h-4 w-4"
+                        />
+                        <label htmlFor="autoUser" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                          <strong>Create User Automatically</strong>
+                          <p className="text-[10px] text-slate-400">
+                            Creates a User account for this employee using company email.
+                          </p>
+                        </label>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={3}
-                    maxLength={5}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="3–5 characters"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={3}
-                    maxLength={5}
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    placeholder="Repeat password"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Passcode (3–5 Chars) <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="password"
+                          required
+                          minLength={3}
+                          maxLength={5}
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          placeholder="3–5 characters (e.g. 1234)"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Confirm Passcode <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="password"
+                          required
+                          minLength={3}
+                          maxLength={5}
+                          value={formData.confirmPassword}
+                          onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                          placeholder="Repeat passcode"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono tracking-wider text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  {/* Company Details Section */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2">Company Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Company <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.company}
+                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Designation <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.designation}
+                          onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                          placeholder="e.g. Lead Enterprise Architect"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Branch
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.branch}
+                          onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                          placeholder="Main Headquarters"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Department
+                        </label>
+                        <select
+                          value={formData.departmentId}
+                          onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="">Unassigned</option>
+                          {departments.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name} ({d.code})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Reports to
+                        </label>
+                        <select
+                          value={formData.managerId}
+                          onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="">None (Super Admin / Exec)</option>
+                          {employees.filter(e => ['ADMIN', 'HR', 'MANAGER'].includes(e.role)).map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.firstName} {m.lastName} ({m.role})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Grade
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.grade}
+                          onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                          placeholder="Grade L5"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Employment Type
+                        </label>
+                        <select
+                          value={formData.employmentType}
+                          onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="Full-time">Full-time</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Contract">Contract</option>
+                          <option value="Internship">Internship</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          System Access Role
+                        </label>
+                        <select
+                          value={formData.role}
+                          disabled={!canManage}
+                          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="EMPLOYEE">Employee</option>
+                          {canManage && (
+                            <>
+                              <option value="MANAGER">Team Lead / Manager</option>
+                              <option value="HR">HR Specialist</option>
+                              <option value="ADMIN">Super Admin</option>
+                            </>
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: ADDRESS & CONTACTS */}
+              {formTab === 'address' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Mobile Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+1 555-0100"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Company Email
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="staff@akoma.io"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-0.5">Provide Email Address registered in company</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Preferred Contact Email
+                      </label>
+                      <select
+                        value={formData.preferredContactEmail}
+                        onChange={(e) => setFormData({ ...formData, preferredContactEmail: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Company Email">Company Email</option>
+                        <option value="Personal Email">Personal Email</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Personal Email
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.personalEmail}
+                        onChange={(e) => setFormData({ ...formData, personalEmail: e.target.value })}
+                        placeholder="personal.address@gmail.com"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Physical / Postal Address
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        placeholder="Suite 400, 100 Enterprise Way, Technology Park"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2">Emergency Contact</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Emergency Contact Name
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.emergencyContactName}
+                          onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
+                          placeholder="Contact person"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Emergency Phone
+                        </label>
+                        <input
+                          type="tel"
+                          value={formData.emergencyPhone}
+                          onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                          placeholder="+1 555-0999"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Relation
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.emergencyRelation}
+                          onChange={(e) => setFormData({ ...formData, emergencyRelation: e.target.value })}
+                          placeholder="e.g. Spouse / Parent"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: ATTENDANCE & LEAVES */}
+              {formTab === 'attendance' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Attendance Device ID (Biometric / RF tag ID)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.attendanceDeviceId}
+                        onChange={(e) => setFormData({ ...formData, attendanceDeviceId: e.target.value })}
+                        placeholder="BIO-TAG-908"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-mono text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Default Shift
+                      </label>
+                      <select
+                        value={formData.defaultShift}
+                        onChange={(e) => setFormData({ ...formData, defaultShift: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Standard Day Shift (08:00 - 17:00)">Standard Day Shift (08:00 - 17:00)</option>
+                        <option value="Morning Shift (07:30 - 19:30)">Morning Shift (07:30 - 19:30)</option>
+                        <option value="Extended Shift (08:00 - 20:00)">Extended Shift (08:00 - 20:00)</option>
+                        <option value="Night Operations Shift">Night Operations Shift</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2">Approvers</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Expense Approver
+                        </label>
+                        <select
+                          value={formData.expenseApprover}
+                          onChange={(e) => setFormData({ ...formData, expenseApprover: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="Finance Department">Finance Department</option>
+                          <option value="Department Head">Department Head</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Shift Request Approver
+                        </label>
+                        <select
+                          value={formData.shiftRequestApprover}
+                          onChange={(e) => setFormData({ ...formData, shiftRequestApprover: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="Assigned Line Manager">Assigned Line Manager</option>
+                          <option value="HR Operations">HR Operations</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Leave Approver
+                        </label>
+                        <select
+                          value={formData.leaveApprover}
+                          onChange={(e) => setFormData({ ...formData, leaveApprover: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        >
+                          <option value="Direct Line Manager & HR">Direct Line Manager & HR</option>
+                          <option value="HR Specialist">HR Specialist</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: SALARY */}
+              {formTab === 'salary' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Cost to Company (CTC) / Base Salary
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.baseSalary}
+                        onChange={(e) => setFormData({ ...formData, baseSalary: e.target.value })}
+                        placeholder="4500.00"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Payroll Cost Center
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.payrollCostCenter}
+                        onChange={(e) => setFormData({ ...formData, payrollCostCenter: e.target.value })}
+                        placeholder="Cost Center - Corporate HQ"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Salary Currency
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.salaryCurrency}
+                        onChange={(e) => setFormData({ ...formData, salaryCurrency: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Salary Mode
+                      </label>
+                      <select
+                        value={formData.salaryMode}
+                        onChange={(e) => setFormData({ ...formData, salaryMode: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Direct Deposit">Direct Deposit</option>
+                        <option value="Cheque">Cheque</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Employee Advance Account
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.advanceAccount}
+                      onChange={(e) => setFormData({ ...formData, advanceAccount: e.target.value })}
+                      placeholder="e.g. Adv - Operations Reserve"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: PERSONAL DETAILS */}
+              {formTab === 'personal' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Marital Status
+                      </label>
+                      <select
+                        value={formData.maritalStatus}
+                        onChange={(e) => setFormData({ ...formData, maritalStatus: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Blood Group
+                      </label>
+                      <select
+                        value={formData.bloodGroup}
+                        onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      >
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Family Background
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.familyBackground}
+                        onChange={(e) => setFormData({ ...formData, familyBackground: e.target.value })}
+                        placeholder="Maintain family details like name and occupation of parent, spouse and children"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Health Details
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.healthDetails}
+                        onChange={(e) => setFormData({ ...formData, healthDetails: e.target.value })}
+                        placeholder="Maintain height, weight, allergies, medical concerns etc."
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Passport Details */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2">Passport Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Passport Number
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.passportNumber}
+                          onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value })}
+                          placeholder="e.g. N9876543"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Date of Issue
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.passportDateOfIssue}
+                          onChange={(e) => setFormData({ ...formData, passportDateOfIssue: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Valid Up To
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.passportValidUpTo}
+                          onChange={(e) => setFormData({ ...formData, passportValidUpTo: e.target.value })}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Place of Issue
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.passportPlaceOfIssue}
+                          onChange={(e) => setFormData({ ...formData, passportPlaceOfIssue: e.target.value })}
+                          placeholder="City / Country"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Action Bar matching Save button */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
@@ -779,13 +1460,15 @@ export const Employees = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer disabled:opacity-50"
-                >
-                  {actionLoading ? 'Registering...' : canManage ? 'Register & Activate' : 'Submit Registration'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="submit"
+                    disabled={actionLoading}
+                    className="px-5 py-2 rounded-xl bg-black hover:bg-slate-800 text-white dark:bg-white dark:text-black dark:hover:bg-slate-200 text-xs font-black shadow-md transition cursor-pointer disabled:opacity-50"
+                  >
+                    {actionLoading ? 'Saving Record...' : 'Save Employee'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
