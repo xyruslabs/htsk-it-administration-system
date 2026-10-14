@@ -33,22 +33,14 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// ─── Download sample template ──────────────────────────────────────────────────
+// ─── Download sample template (.xlsx) ──────────────────────────────────────────
 const downloadTemplate = () => {
-  const rows = [
-    ['First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Designation', 'Department', 'Password'],
-    ['Sarah',      'Vance',     'sarah.vance@company.com',   '+94771234567', 'EMPLOYEE', 'Data Analyst',      'Data Analyst employees',    '1234'],
-    ['Marcus',     'Sterling',  'marcus.sterling@company.com','+94779876543', 'MANAGER',  'Risk Lead',         'Risk analyst employees',    'abc1'],
-    ['Priya',      'Nair',      'priya.nair@company.com',    '+94712345678', 'EMPLOYEE', 'Finance Officer',   'Finance employees',         '5678'],
-  ];
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = 'SmartHR_Employee_Import_Template.csv';
+  const a = document.createElement('a');
+  a.href = '/SmartHR_Employees_Import_Template.xlsx';
+  a.download = 'SmartHR_Employees_Import_Sample.xlsx';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 };
 
 export default function ImportEmployees() {
