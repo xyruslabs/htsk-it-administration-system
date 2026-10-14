@@ -100,7 +100,7 @@ npm run dev      # Starts Vite client on http://localhost:5173
 
 ### 7. Security, Compliance & Audit Trail
 - Immutable security audit log tracking every login, attendance entry, leave decision, and employee profile modification.
-- Privacy-compliant architecture with sensitive payroll and compensation details fully removed.
+- Privacy-compliant architecture focusing strictly on workforce attendance, leave administration, and employee management.
 
 ### 8. Modern UI & SaaS Aesthetics
 - Bespoke kinetic logo splash screen with on-demand replay action.
