@@ -40,7 +40,8 @@ import {
   UserCheck,
   CheckCheck,
   Trash2,
-  Inbox
+  Inbox,
+  Upload
 } from 'lucide-react';
 
 export const Layout = ({ children }) => {
@@ -141,6 +142,13 @@ export const Layout = ({ children }) => {
           path: '/employees',
           icon: Users,
           roles: ['ADMIN', 'HR']
+        },
+        {
+          label: 'Import Employees',
+          path: '/import-employees',
+          icon: Upload,
+          roles: ['ADMIN', 'HR'],
+          badge: 'Excel'
         }
       ]
     },

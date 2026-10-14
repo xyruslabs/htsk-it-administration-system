@@ -8,6 +8,7 @@ import employeeRoutes from './routes/employeeRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import importRoutes from './routes/importRoutes.js';
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/import', importRoutes);
 
 // Global 404 handler
 app.use((req, res) => {

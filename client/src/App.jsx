@@ -15,6 +15,7 @@ import { BreakTime } from './pages/BreakTime';
 import { LeaveManagement } from './pages/LeaveManagement';
 import { Employees } from './pages/Employees';
 import { AuditLogs } from './pages/AuditLogs';
+import ImportEmployees from './pages/ImportEmployees';
 
 export function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -109,6 +110,17 @@ export function App() {
               <ProtectedRoute allowedRoles={['ADMIN', 'HR']}>
                 <Layout>
                   <AuditLogs />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/import-employees"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR']}>
+                <Layout>
+                  <ImportEmployees />
                 </Layout>
               </ProtectedRoute>
             }
